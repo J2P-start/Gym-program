@@ -96,9 +96,9 @@ function ExerciseCard({ exercise, oneRMs, isDeload, onSetsComplete }) {
   }
 
   const suggested = calcWeight(exercise, oneRMs, isDeload);
+  const pct = exercise.loadType === 'percent' ? (isDeload ? 60 : exercise.percentRange[0]) : null;
   const loadLabel = (() => {
     if (exercise.loadType === 'percent') {
-      const pct = isDeload ? 60 : exercise.percentRange[0];
       return suggested ? `${pct}% → ${suggested} kg` : `${pct}% 1RM — set your 1RM`;
     }
     if (exercise.loadType === 'bodyweight') return 'Bodyweight';
@@ -106,14 +106,27 @@ function ExerciseCard({ exercise, oneRMs, isDeload, onSetsComplete }) {
     return exercise.note ?? '';
   })();
 
+  const restLabel = exercise.restSeconds > 0
+    ? `${Math.floor(exercise.restSeconds / 60)}:${String(exercise.restSeconds % 60).padStart(2, '0')} rest`
+    : null;
+
   return (
     <div className="exercise-card">
       <div className="exercise-header">
         <h3>{exercise.name}</h3>
-        <span className="exercise-meta">{setCount} sets × {exercise.repLabel}</span>
+        <span className="exercise-meta">{setCount} × {exercise.repLabel}</span>
       </div>
-      <div className="load-label">{loadLabel}</div>
+      <div className="exercise-info-row">
+        <span className="load-label">{loadLabel}</span>
+        {restLabel && <span className="rest-label">{restLabel}</span>}
+      </div>
       <div className="sets-list">
+        <div className="set-header-row">
+          <span className="set-num" />
+          <span className="set-col-label">kg</span>
+          <span className="set-col-label">reps</span>
+          <span className="set-done-spacer" />
+        </div>
         {Array.from({ length: setCount }, (_, i) => (
           <SetRow
             key={i}
