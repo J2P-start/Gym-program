@@ -253,11 +253,15 @@ html, body, #root {
   font-size: 11px;
   color: var(--text2);
   position: relative;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
 }
 .day-chip.today { border-color: var(--accent); color: var(--text); }
+.day-chip.selected { background: var(--bg3); color: var(--text); }
+.day-chip.selected.type-gym { border-color: var(--accent); }
 .day-abbr { font-weight: 700; font-size: 12px; }
 .type-bjj .day-abbr { color: #60a5fa; }
-.type-gym.today .day-abbr { color: var(--accent); }
+.type-gym.today .day-abbr, .type-gym.selected .day-abbr { color: var(--accent); }
 .type-recovery .day-abbr { color: var(--warn); }
 .today-dot {
   width: 5px; height: 5px;
@@ -271,6 +275,7 @@ html, body, #root {
   border-radius: var(--radius);
   padding: 20px;
 }
+.session-day-label { font-size: 12px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
 .today-card h2 { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
 .session-note { color: var(--text2); font-size: 14px; margin-bottom: 6px; }
 .session-duration { color: var(--text2); font-size: 13px; margin-bottom: 20px; }

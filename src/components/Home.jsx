@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { WEEK_SCHEDULE, SESSIONS } from '../data/workout';
 import { getBlock } from '../utils/storage';
 import { checkDeload } from '../utils/deload';
@@ -8,8 +8,7 @@ const WEEKS_TO_SHOW = 4;
 
 function getWeekDays(offsetWeeks) {
   const today = new Date();
-  const dayOfWeek = today.getDay(); // 0=Sun
-  // Start of this week = Monday
+  const dayOfWeek = today.getDay();
   const monday = new Date(today);
   monday.setDate(today.getDate() - ((dayOfWeek + 6) % 7) + offsetWeeks * 7);
   return Array.from({ length: 7 }, (_, i) => {
@@ -25,7 +24,13 @@ export default function Home({ user, onStartSession, onDismissDeload, deloadDism
   const block = getBlock(user);
   const deload = useMemo(() => checkDeload(user), [user]);
 
-  const todaySchedule = WEEK_SCHEDULE.find((d) => d.day === todayName);
+  // Default selected day to today's schedule index (0=Mon…6=Sun)
+  const todayScheduleIndex = WEEK_SCHEDULE.findIndex((d) => d.day === todayName);
+  const [selectedDayIndex, setSelectedDayIndex] = useState(
+    todayScheduleIndex >= 0 ? todayScheduleIndex : 0
+  );
+
+  const selectedSchedule = WEEK_SCHEDULE[selectedDayIndex];
 
   const weeks = Array.from({ length: WEEKS_TO_SHOW }, (_, i) => ({
     label: i === 0 ? 'This week' : i === 1 ? 'Next week' : `+${i} weeks`,
@@ -51,6 +56,7 @@ export default function Home({ user, onStartSession, onDismissDeload, deloadDism
         </div>
       )}
 
+      {/* Scrollable week view */}
       <div className="multi-week-scroll">
         {weeks.map(({ label, days }, wi) => (
           <div key={wi} className="week-block">
@@ -60,8 +66,13 @@ export default function Home({ user, onStartSession, onDismissDeload, deloadDism
                 const schedule = WEEK_SCHEDULE[di];
                 const dateStr = date.toISOString().slice(0, 10);
                 const isToday = dateStr === todayDateStr;
+                const isSelected = di === selectedDayIndex;
                 return (
-                  <div key={di} className={`day-chip ${isToday ? 'today' : ''} type-${schedule.type}`}>
+                  <button
+                    key={di}
+                    className={`day-chip ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''} type-${schedule.type}`}
+                    onClick={() => setSelectedDayIndex(di)}
+                  >
                     <span className="day-abbr">{schedule.day.slice(0, 3)}</span>
                     <span className="day-type">
                       {schedule.type === 'gym'
@@ -69,7 +80,7 @@ export default function Home({ user, onStartSession, onDismissDeload, deloadDism
                         : schedule.type === 'bjj' ? 'BJJ' : 'Rest'}
                     </span>
                     {isToday && <span className="today-dot" />}
-                  </div>
+                  </button>
                 );
               })}
             </div>
@@ -77,25 +88,29 @@ export default function Home({ user, onStartSession, onDismissDeload, deloadDism
         ))}
       </div>
 
+      {/* Session card for selected day */}
       <div className="today-card">
-        {todaySchedule?.type === 'gym' && (
+        {selectedSchedule?.type === 'gym' && (
           <>
-            <h2>{SESSIONS[todaySchedule.sessionIndex].name}</h2>
-            <p className="session-note">{SESSIONS[todaySchedule.sessionIndex].note}</p>
-            <p className="session-duration">{SESSIONS[todaySchedule.sessionIndex].duration}</p>
-            <button className="btn-primary start-btn" onClick={() => onStartSession(todaySchedule.sessionIndex)}>
+            <div className="session-day-label">{selectedSchedule.day}</div>
+            <h2>{SESSIONS[selectedSchedule.sessionIndex].name}</h2>
+            <p className="session-note">{SESSIONS[selectedSchedule.sessionIndex].note}</p>
+            <p className="session-duration">{SESSIONS[selectedSchedule.sessionIndex].duration}</p>
+            <button className="btn-primary start-btn" onClick={() => onStartSession(selectedSchedule.sessionIndex)}>
               Start session
             </button>
           </>
         )}
-        {todaySchedule?.type === 'bjj' && (
+        {selectedSchedule?.type === 'bjj' && (
           <div className="rest-card">
+            <div className="session-day-label">{selectedSchedule.day}</div>
             <h2>BJJ day</h2>
             <p>Focus on technique. Recover well.</p>
           </div>
         )}
-        {todaySchedule?.type === 'recovery' && (
+        {selectedSchedule?.type === 'recovery' && (
           <div className="rest-card">
+            <div className="session-day-label">{selectedSchedule.day}</div>
             <h2>Recovery day</h2>
             <p>Mobility + sauna. See Recovery tab.</p>
           </div>
