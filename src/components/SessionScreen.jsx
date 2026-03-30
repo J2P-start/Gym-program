@@ -73,13 +73,23 @@ function RestTimer({ seconds, onDone }) {
     else setRunning((r) => !r);
   }
 
+  function reset(e) {
+    e.stopPropagation();
+    clearInterval(ref.current);
+    setRemaining(seconds);
+    setRunning(false);
+  }
+
   const m = Math.floor(remaining / 60);
   const s = remaining % 60;
 
   return (
-    <button className={`rest-timer ${running ? 'running' : ''}`} onClick={toggle}>
-      {running ? `${m}:${s.toString().padStart(2, '0')}` : remaining === 0 ? 'Rest done' : `Rest ${m}:${s.toString().padStart(2, '0')}`}
-    </button>
+    <div className={`rest-timer ${running ? 'running' : ''}`}>
+      <button className="rest-timer-main" onClick={toggle}>
+        {running ? `${m}:${s.toString().padStart(2, '0')}` : remaining === 0 ? 'Rest done' : `Rest ${m}:${s.toString().padStart(2, '0')}`}
+      </button>
+      <button className="rest-timer-reset" onClick={reset}>↺</button>
+    </div>
   );
 }
 
