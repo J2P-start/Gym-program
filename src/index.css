@@ -340,31 +340,22 @@ html, body, #root {
   padding: 3px 10px;
 }
 
-.sets-list { display: flex; flex-direction: column; gap: 6px; max-width: 320px; }
+.sets-list { display: grid; grid-template-columns: 24px 1fr 1fr 60px; gap: 6px 8px; max-width: 320px; align-items: center; }
 
-.set-header-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 0 0 2px;
-}
+.set-header-row { display: contents; }
 .set-col-label {
-  flex: 1;
   text-align: center;
   font-size: 11px;
   font-weight: 700;
   color: var(--text2);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  padding-bottom: 2px;
 }
-.set-done-spacer { width: 60px; flex-shrink: 0; }
+.set-done-spacer { /* occupies Done column in header */ }
 
-.set-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.set-num { width: 20px; text-align: center; color: var(--text2); font-size: 13px; flex-shrink: 0; }
+.set-row { display: contents; }
+.set-num { text-align: center; color: var(--text2); font-size: 13px; }
 
 .set-input {
   flex: 1;
