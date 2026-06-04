@@ -37,6 +37,7 @@ export default function App() {
             deloadDismissed={deloadDismissed}
             onDismissDeload={() => setDeloadDismissed(true)}
             onStartSession={(index) => setSession({ index, isDeload: false })}
+            onSwitchUser={() => setUser(null)}
           />
         )}
         {tab === 'progress' && <Progress user={user} />}

@@ -13,8 +13,12 @@ export default function ProfileSelector({ onSelect }) {
 
   if (setupMode) {
     const valid = names[0].trim() && names[1].trim() && names[0].trim() !== names[1].trim();
+    const canGoBack = existing.length === 2;
     return (
       <div className="profile-selector">
+        {canGoBack && (
+          <button className="btn-back-top" onClick={() => setSetupMode(false)}>← Back</button>
+        )}
         <h1>BJJ Gym Tracker</h1>
         <p className="subtitle">First-time setup — enter both names</p>
         <div className="setup-inputs">

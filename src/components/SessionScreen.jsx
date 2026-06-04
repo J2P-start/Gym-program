@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { SESSIONS, TRACKED_LIFTS } from '../data/workout';
-import { get1RMs, set1RM, addLog, getBlock, setBlock } from '../utils/storage';
+import { get1RMs, set1RM, addLog, getBlock, setBlock, getLastSession } from '../utils/storage';
 import { workingWeight, bestEstimated1RM } from '../utils/oneRM';
 
 function calcWeight(exercise, oneRMs, isDeload) {
@@ -11,9 +11,9 @@ function calcWeight(exercise, oneRMs, isDeload) {
   return workingWeight(rm, pct);
 }
 
-function SetRow({ setNum, exercise, oneRMs, isDeload, onComplete }) {
+function SetRow({ setNum, exercise, oneRMs, isDeload, prevWeight, onComplete }) {
   const suggested = calcWeight(exercise, oneRMs, isDeload);
-  const [weight, setWeight] = useState(suggested ?? '');
+  const [weight, setWeight] = useState(suggested ?? prevWeight ?? '');
   const [reps, setReps] = useState(exercise.reps ?? '');
   const [done, setDone] = useState(false);
 
@@ -73,17 +73,27 @@ function RestTimer({ seconds, onDone }) {
     else setRunning((r) => !r);
   }
 
+  function reset(e) {
+    e.stopPropagation();
+    clearInterval(ref.current);
+    setRemaining(seconds);
+    setRunning(false);
+  }
+
   const m = Math.floor(remaining / 60);
   const s = remaining % 60;
 
   return (
-    <button className={`rest-timer ${running ? 'running' : ''}`} onClick={toggle}>
-      {running ? `${m}:${s.toString().padStart(2, '0')}` : remaining === 0 ? 'Rest done' : `Rest ${m}:${s.toString().padStart(2, '0')}`}
-    </button>
+    <div className={`rest-timer ${running ? 'running' : ''}`}>
+      <button className="rest-timer-main" onClick={toggle}>
+        {running ? `${m}:${s.toString().padStart(2, '0')}` : remaining === 0 ? 'Rest done' : `Rest ${m}:${s.toString().padStart(2, '0')}`}
+      </button>
+      <button className="rest-timer-reset" onClick={reset}>↺</button>
+    </div>
   );
 }
 
-function ExerciseCard({ exercise, oneRMs, isDeload, onSetsComplete }) {
+function ExerciseCard({ exercise, oneRMs, isDeload, prevSets, onSetsComplete }) {
   const setCount = isDeload ? Math.max(1, exercise.sets - 1) : exercise.sets;
   const [completedSets, setCompletedSets] = useState([]);
   const [showTimer, setShowTimer] = useState(false);
@@ -96,9 +106,9 @@ function ExerciseCard({ exercise, oneRMs, isDeload, onSetsComplete }) {
   }
 
   const suggested = calcWeight(exercise, oneRMs, isDeload);
+  const pct = exercise.loadType === 'percent' ? (isDeload ? 60 : exercise.percentRange[0]) : null;
   const loadLabel = (() => {
     if (exercise.loadType === 'percent') {
-      const pct = isDeload ? 60 : exercise.percentRange[0];
       return suggested ? `${pct}% → ${suggested} kg` : `${pct}% 1RM — set your 1RM`;
     }
     if (exercise.loadType === 'bodyweight') return 'Bodyweight';
@@ -106,14 +116,37 @@ function ExerciseCard({ exercise, oneRMs, isDeload, onSetsComplete }) {
     return exercise.note ?? '';
   })();
 
+  const prevHint = (() => {
+    if (exercise.loadType === 'percent' || !prevSets?.length) return null;
+    const weights = prevSets.map((s) => s.actualWeight).filter((w) => w > 0);
+    if (!weights.length) return null;
+    const min = Math.min(...weights);
+    const max = Math.max(...weights);
+    return min === max ? `Last: ${min} kg` : `Last: ${min}–${max} kg`;
+  })();
+
+  const restLabel = exercise.restSeconds > 0
+    ? `${Math.floor(exercise.restSeconds / 60)}:${String(exercise.restSeconds % 60).padStart(2, '0')} rest`
+    : null;
+
   return (
     <div className="exercise-card">
       <div className="exercise-header">
         <h3>{exercise.name}</h3>
-        <span className="exercise-meta">{setCount} sets × {exercise.repLabel}</span>
+        <span className="exercise-meta">{setCount} × {exercise.repLabel}</span>
       </div>
-      <div className="load-label">{loadLabel}</div>
+      <div className="exercise-info-row">
+        <span className="load-label">{loadLabel}</span>
+        {restLabel && <span className="rest-label">{restLabel}</span>}
+      </div>
+      {prevHint && <span className="prev-weight-hint">{prevHint}</span>}
       <div className="sets-list">
+        <div className="set-header-row">
+          <span className="set-num" />
+          <span className="set-col-label">kg</span>
+          <span className="set-col-label">reps</span>
+          <span className="set-done-spacer" />
+        </div>
         {Array.from({ length: setCount }, (_, i) => (
           <SetRow
             key={i}
@@ -121,6 +154,7 @@ function ExerciseCard({ exercise, oneRMs, isDeload, onSetsComplete }) {
             exercise={exercise}
             oneRMs={oneRMs}
             isDeload={isDeload}
+            prevWeight={prevSets?.[i]?.actualWeight ?? null}
             onComplete={handleSetDone}
           />
         ))}
@@ -138,6 +172,13 @@ export default function SessionScreen({ user, sessionIndex, isDeload, onFinish, 
   const [exerciseSets, setExerciseSets] = useState({});
   const [showFatigue, setShowFatigue] = useState(false);
   const [estimatedSummary, setEstimatedSummary] = useState({});
+
+  const prevExercises = (() => {
+    const sessionName = `${session.day} — ${session.name}`;
+    const lastLog = getLastSession(user, sessionName);
+    if (!lastLog) return {};
+    return Object.fromEntries(lastLog.exercises.map((e) => [e.name, e.sets]));
+  })();
 
   function handleSetsComplete(name, sets) {
     setExerciseSets((prev) => ({ ...prev, [name]: sets }));
@@ -229,6 +270,7 @@ export default function SessionScreen({ user, sessionIndex, isDeload, onFinish, 
             exercise={ex}
             oneRMs={oneRMs}
             isDeload={isDeload}
+            prevSets={prevExercises[ex.name] ?? null}
             onSetsComplete={handleSetsComplete}
           />
         ))}
