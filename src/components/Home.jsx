@@ -18,11 +18,11 @@ function getWeekDays(offsetWeeks) {
   });
 }
 
-export default function Home({ user, onStartSession, onDismissDeload, deloadDismissed, onSwitchUser }) {
+export default function Home({ user, onStartSession, onDismissDeload, deloadDismissed, onSwitchUser, lastFinished }) {
   const todayName = DAY_NAMES[new Date().getDay()];
   const todayDateStr = new Date().toISOString().slice(0, 10);
-  const block = getBlock(user);
-  const deload = useMemo(() => checkDeload(user), [user]);
+  const block = useMemo(() => getBlock(user), [user, lastFinished]);
+  const deload = useMemo(() => checkDeload(user), [user, lastFinished]);
 
   // Default selected day to today's schedule index (0=Mon…6=Sun)
   const todayScheduleIndex = WEEK_SCHEDULE.findIndex((d) => d.day === todayName);
