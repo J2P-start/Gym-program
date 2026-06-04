@@ -10,7 +10,13 @@ export default function Settings({ user, onUserChange, onSwitchUser }) {
   const [saved, setSaved] = useState(false);
 
   function handleRMChange(lift, val) {
-    const next = { ...oneRMs, [lift]: parseFloat(val) || 0 };
+    const parsed = parseFloat(val);
+    const next = { ...oneRMs };
+    if (val === '' || isNaN(parsed)) {
+      delete next[lift];
+    } else {
+      next[lift] = parsed;
+    }
     setOneRMs(next);
   }
 

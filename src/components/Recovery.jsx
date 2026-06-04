@@ -1,9 +1,7 @@
-import { useState } from 'react';
 import { RECOVERY_DAY } from '../data/workout';
 
-export default function Recovery() {
-  const [checked, setChecked] = useState({});
-  function toggle(key) { setChecked((p) => ({ ...p, [key]: !p[key] })); }
+export default function Recovery({ checked, onToggle }) {
+  function toggle(key) { onToggle(key); }
 
   return (
     <div className="recovery-screen">

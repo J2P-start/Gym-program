@@ -13,7 +13,23 @@ function get(key, fallback) {
 }
 
 function set(key, value) {
-  localStorage.setItem(key, JSON.stringify(value));
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function storageAvailable() {
+  try {
+    const t = '__test__';
+    localStorage.setItem(t, '1');
+    localStorage.removeItem(t);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export function getUsers() { return get(KEY_USERS, []); }
@@ -31,7 +47,7 @@ export function getLogs(username) { return get(keyLog(username), []); }
 export function addLog(username, entry) {
   const logs = getLogs(username);
   logs.push(entry);
-  set(keyLog(username), logs);
+  return set(keyLog(username), logs);
 }
 
 export function getLastSession(username, sessionName) {

@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { SESSIONS, TRACKED_LIFTS } from '../data/workout';
-import { get1RMs, set1RM, addLog, getBlock, setBlock, getLastSession } from '../utils/storage';
+import { get1RMs, set1RM, addLog, getBlock, setBlock, getLastSession, storageAvailable } from '../utils/storage';
 import { workingWeight, bestEstimated1RM } from '../utils/oneRM';
 
 function calcWeight(exercise, oneRMs, isDeload) {
@@ -56,6 +56,8 @@ function RestTimer({ seconds, onDone }) {
   const [remaining, setRemaining] = useState(seconds);
   const [running, setRunning] = useState(false);
   const ref = useRef(null);
+  const onDoneRef = useRef(onDone);
+  useEffect(() => { onDoneRef.current = onDone; });
 
   useEffect(() => {
     if (running && remaining > 0) {
@@ -63,7 +65,7 @@ function RestTimer({ seconds, onDone }) {
     } else if (remaining === 0) {
       clearInterval(ref.current);
       setRunning(false);
-      onDone?.();
+      onDoneRef.current?.();
     }
     return () => clearInterval(ref.current);
   }, [running, remaining]);
@@ -173,12 +175,12 @@ export default function SessionScreen({ user, sessionIndex, isDeload, onFinish, 
   const [showFatigue, setShowFatigue] = useState(false);
   const [estimatedSummary, setEstimatedSummary] = useState({});
 
-  const prevExercises = (() => {
+  const prevExercises = useMemo(() => {
     const sessionName = `${session.day} — ${session.name}`;
     const lastLog = getLastSession(user, sessionName);
     if (!lastLog) return {};
     return Object.fromEntries(lastLog.exercises.map((e) => [e.name, e.sets]));
-  })();
+  }, [user, session]);
 
   function handleSetsComplete(name, sets) {
     setExerciseSets((prev) => ({ ...prev, [name]: sets }));
@@ -190,13 +192,18 @@ export default function SessionScreen({ user, sessionIndex, isDeload, onFinish, 
         if (est > current) {
           set1RM(user, name, est);
           setOneRMs((prev) => ({ ...prev, [name]: est }));
+          setEstimatedSummary((prev) => ({ ...prev, [name]: est }));
         }
-        setEstimatedSummary((prev) => ({ ...prev, [name]: est }));
       }
     }
   }
 
   const allDone = session.exercises.every((e) => exerciseSets[e.name]);
+
+  function handleBack() {
+    if (Object.keys(exerciseSets).length > 0 && !window.confirm('Go back? Your progress for this session will be lost.')) return;
+    onBack();
+  }
 
   function handleFatigue(rating) {
     const block = getBlock(user);
@@ -213,7 +220,11 @@ export default function SessionScreen({ user, sessionIndex, isDeload, onFinish, 
         sets: (exerciseSets[e.name] ?? []).map((s, i) => ({ setNumber: i + 1, ...s })),
       })),
     };
-    addLog(user, entry);
+    const saved = addLog(user, entry);
+    if (!saved) {
+      alert('Could not save your session — storage may be full. Please free up space and try again.');
+      return;
+    }
 
     if (isDeload) {
       setBlock(user, { week: 1, startDate: new Date().toISOString().slice(0, 10), lastDeloadDate: new Date().toISOString().slice(0, 10) });
@@ -255,7 +266,7 @@ export default function SessionScreen({ user, sessionIndex, isDeload, onFinish, 
   return (
     <div className="session-screen">
       <div className="session-header">
-        <button className="btn-back" onClick={onBack}>←</button>
+        <button className="btn-back" onClick={handleBack}>←</button>
         <div>
           <h2>{session.name}</h2>
           {isDeload && <span className="deload-badge">Deload</span>}
