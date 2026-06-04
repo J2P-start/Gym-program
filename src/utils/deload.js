@@ -23,7 +23,7 @@ export function checkDeload(username) {
       .slice(-3);
     if (liftSessions.length >= 3) {
       const orms = liftSessions.map((l) => l.exercises.find((e) => e.name === lift)?.estimatedOneRM ?? 0);
-      if (orms[2] <= orms[0] && orms[1] <= orms[0]) {
+      if (orms[2] < orms[1] && orms[1] < orms[0]) {
         reasons.push(`${lift} has stalled for 3 sessions`);
         break; // one stall reason is enough
       }
