@@ -11,6 +11,8 @@ export default function App() {
   const [tab, setTab] = useState('home');
   const [session, setSession] = useState(null); // { index, isDeload }
   const [deloadDismissed, setDeloadDismissed] = useState(false);
+  const [lastFinished, setLastFinished] = useState(0);
+  const [recoveryChecked, setRecoveryChecked] = useState({});
 
   if (!user) {
     return <ProfileSelector onSelect={(name) => { setUser(name); setTab('home'); }} />;
@@ -23,7 +25,7 @@ export default function App() {
         sessionIndex={session.index}
         isDeload={session.isDeload}
         onBack={() => setSession(null)}
-        onFinish={() => { setSession(null); setTab('home'); }}
+        onFinish={() => { setSession(null); setTab('home'); setLastFinished(Date.now()); }}
       />
     );
   }
@@ -35,13 +37,19 @@ export default function App() {
           <Home
             user={user}
             deloadDismissed={deloadDismissed}
+            lastFinished={lastFinished}
             onDismissDeload={() => setDeloadDismissed(true)}
             onStartSession={(index) => setSession({ index, isDeload: false })}
             onSwitchUser={() => setUser(null)}
           />
         )}
         {tab === 'progress' && <Progress user={user} />}
-        {tab === 'recovery' && <Recovery />}
+        {tab === 'recovery' && (
+          <Recovery
+            checked={recoveryChecked}
+            onToggle={(key) => setRecoveryChecked((p) => ({ ...p, [key]: !p[key] }))}
+          />
+        )}
         {tab === 'settings' && (
           <Settings
             user={user}

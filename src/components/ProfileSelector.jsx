@@ -3,13 +3,12 @@ import { getUsers, setUsers } from '../utils/storage';
 
 export default function ProfileSelector({ onSelect }) {
   const existing = getUsers();
-  const [names, setNames] = useState(existing.length === 2 ? existing : ['', '']);
+  const [names, setNames] = useState(() => {
+    if (existing.length >= 2) return existing.slice(0, 2);
+    if (existing.length === 1) return [existing[0], ''];
+    return ['', ''];
+  });
   const [setupMode, setSetupMode] = useState(existing.length < 2);
-
-  function saveAndSelect(name) {
-    setUsers(names.filter(Boolean));
-    onSelect(name);
-  }
 
   if (setupMode) {
     const valid = names[0].trim() && names[1].trim() && names[0].trim() !== names[1].trim();
@@ -58,7 +57,7 @@ export default function ProfileSelector({ onSelect }) {
       <p className="subtitle">Who's training?</p>
       <div className="profile-buttons">
         {names.map((name) => (
-          <button key={name} className="profile-btn" onClick={() => saveAndSelect(name)}>
+          <button key={name} className="profile-btn" onClick={() => onSelect(name)}>
             {name}
           </button>
         ))}
