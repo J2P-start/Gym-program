@@ -34,6 +34,15 @@ export function addLog(username, entry) {
   set(keyLog(username), logs);
 }
 
+export function getLastSession(username, sessionName) {
+  const logs = getLogs(username);
+  const today = new Date().toISOString().slice(0, 10);
+  for (let i = logs.length - 1; i >= 0; i--) {
+    if (logs[i].session === sessionName && logs[i].date !== today) return logs[i];
+  }
+  return null;
+}
+
 export function getBlock(username) {
   return get(keyBlock(username), { week: 1, startDate: new Date().toISOString().slice(0, 10), lastDeloadDate: null });
 }
