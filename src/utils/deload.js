@@ -16,7 +16,10 @@ export function checkDeload(username) {
     reasons.push('High fatigue in recent sessions');
   }
 
-  // 2. Stall: same 1RM lift fails to progress for 3 consecutive sessions
+  // 2. Stall: estimated 1RM is strictly declining across 3 consecutive sessions.
+  // Requires a monotonically falling trend (orms[2] < orms[1] < orms[0]) so that
+  // a flat 1RM (completing prescribed sets at the same %) never triggers a false
+  // stall, and a V-shape dip that is already recovering also doesn't fire.
   for (const lift of TRACKED_LIFTS) {
     const liftSessions = logs
       .filter((l) => !l.isDeload && l.exercises?.some((e) => e.name === lift && e.estimatedOneRM))
