@@ -4,6 +4,35 @@ import { get1RMs, set1RM, addLog, getBlock, setBlock, getLastSession, storageAva
 import { bestEstimated1RM } from '../utils/oneRM';
 import { blockPercent, blockWeight, trainingWeek } from '../utils/progression';
 import { localDateStr } from '../utils/dates';
+import { warmupSets } from '../utils/warmup';
+
+function WarmupChecklist({ items }) {
+  const [done, setDone] = useState(() => items.map(() => false));
+  const [collapsed, setCollapsed] = useState(false);
+  const doneCount = done.filter(Boolean).length;
+
+  return (
+    <div className="exercise-card warmup-card">
+      <button className="warmup-header" onClick={() => setCollapsed((c) => !c)}>
+        <h3>Warm-up</h3>
+        <span className="exercise-meta">{doneCount}/{items.length} {collapsed ? '▸' : '▾'}</span>
+      </button>
+      {!collapsed && items.map((item, i) => (
+        <label key={item.name} className={`checklist-item ${done[i] ? 'checked' : ''}`}>
+          <input
+            type="checkbox"
+            checked={done[i]}
+            onChange={() => setDone((prev) => prev.map((v, j) => (j === i ? !v : v)))}
+          />
+          <span>
+            {item.name}
+            <span className="warmup-detail">{item.detail}</span>
+          </span>
+        </label>
+      ))}
+    </div>
+  );
+}
 
 function calcWeight(exercise, oneRMs, isDeload, week) {
   if (exercise.loadType !== 'percent') return null;
@@ -119,6 +148,13 @@ function ExerciseCard({ exercise, oneRMs, isDeload, week, prevSets, onSetsComple
     return exercise.note ?? '';
   })();
 
+  const rampLine = (() => {
+    if (exercise.loadType !== 'percent' || !suggested) return null;
+    const ramp = warmupSets(suggested);
+    if (ramp.length === 0) return null;
+    return ramp.map((s) => `${s.label === 'Bar' ? 'Bar' : `${s.weight} kg`} ×${s.reps}`).join(' · ');
+  })();
+
   const prevHint = (() => {
     if (exercise.loadType === 'percent' || !prevSets?.length) return null;
     const weights = prevSets.map((s) => s.actualWeight).filter((w) => w > 0);
@@ -142,6 +178,7 @@ function ExerciseCard({ exercise, oneRMs, isDeload, week, prevSets, onSetsComple
         <span className="load-label">{loadLabel}</span>
         {restLabel && <span className="rest-label">{restLabel}</span>}
       </div>
+      {rampLine && <span className="warmup-ramp">Warm-up: {rampLine}</span>}
       {prevHint && <span className="prev-weight-hint">{prevHint}</span>}
       <div className="sets-list">
         <div className="set-header-row">
@@ -278,6 +315,7 @@ export default function SessionScreen({ user, sessionIndex, isDeload, onFinish, 
       <p className="session-note">{session.note}</p>
 
       <div className="exercises">
+        {session.warmup?.length > 0 && <WarmupChecklist items={session.warmup} />}
         {session.exercises.map((ex) => (
           <ExerciseCard
             key={ex.name}

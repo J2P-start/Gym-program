@@ -369,6 +369,34 @@ html, body, #root {
   margin-bottom: 10px;
 }
 
+.warmup-ramp {
+  display: block;
+  font-size: 12px;
+  color: var(--lavender);
+  margin-bottom: 10px;
+}
+
+.warmup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  width: 100%;
+  background: none;
+  border: none;
+  color: var(--text);
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+}
+.warmup-header h3 { font-size: 16px; font-weight: 600; }
+.warmup-card .checklist-item:first-of-type { margin-top: 8px; }
+.warmup-detail {
+  display: block;
+  font-size: 12px;
+  color: var(--text2);
+}
+.checklist-item.checked .warmup-detail { text-decoration: line-through; }
+
 .sets-list { display: grid; grid-template-columns: 20px 1fr 1fr 52px; gap: 6px 6px; width: 100%; align-items: center; }
 
 .set-header-row { display: contents; }
