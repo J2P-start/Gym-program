@@ -32,7 +32,7 @@ src/
 │   ├── Progress.jsx        # Charts and session history log
 │   ├── Settings.jsx        # Manual 1RM management
 │   ├── Recovery.jsx        # Recovery day checklist
-│   └── ProfileSelector.jsx # Multi-user profile selection
+│   └── ProfileSelector.jsx # First-run name setup (single athlete)
 ├── data/
 │   └── workout.js          # All exercise definitions and session structure
 ├── utils/
@@ -49,7 +49,7 @@ All keys are namespaced by username:
 
 | Key | Value |
 |-----|-------|
-| `bjj_users` | `string[]` — list of user names |
+| `bjj_users` | `string[]` — the first entry is the active (only) athlete; extra entries are legacy |
 | `bjj_1rm_<user>` | `{ [exerciseName]: number }` — estimated 1RMs in kg |
 | `bjj_log_<user>` | `SessionLog[]` — full workout history |
 | `bjj_block_<user>` | `{ week, startDate, lastDeloadDate }` — block progression |
@@ -79,7 +79,7 @@ Defined in `src/data/workout.js`. Each exercise has a `loadType`:
 
 | loadType | Behaviour | Weight input |
 |----------|-----------|--------------|
-| `'percent'` | Weight calculated from 1RM × percentRange | Auto-filled from 1RM |
+| `'percent'` | Weight from 1RM × ramped % — `blockPercent()` ramps from percentRange low to high (+2.5 pts every 2 block weeks) | Auto-filled from 1RM |
 | `'bodyweight'` | Displays "Bodyweight" | No weight tracking |
 | `'note'` | Displays guidance text (e.g. "Moderate-heavy") | Manual entry; shows "Last: X kg" hint from previous session |
 | `'added'` | For weighted accessories (e.g. "+10–20 kg added") | Manual entry |
@@ -91,7 +91,10 @@ Defined in `src/data/workout.js`. Each exercise has a `loadType`:
 - **`storage.getLastSession(username, sessionName)`** — finds the most recent log entry for a given session name, excluding today. Used to show previous weights for `note`-type exercises.
 - **`oneRM.workingWeight(rm, pct)`** — returns the working weight for a given 1RM and percentage (rounded to nearest 2.5 kg).
 - **`oneRM.bestEstimated1RM(sets)`** — returns the highest Epley-estimated 1RM across all sets (only sets with ≤ 10 reps).
+- **`progression.blockPercent(percentRange, week, isDeload)`** — % of 1RM for a given block week: ramps from `percentRange[0]` by +2.5 points every 2 weeks, capped at `percentRange[1]`; always 60 on deload. `progression.blockWeight(rm, range, week, isDeload)` converts that to kg.
+- **`progression.trainingWeek(username)`** — the block week used for the ramp and all "Block week N" displays: 1 + distinct *past* calendar weeks (Mon–Sun) with a non-deload session since `block.startDate`. Counts weeks actually trained, so missed weeks don't advance the ramp; the stored `block.week` session counter is legacy.
 - **`deload.checkDeload(username)`** — returns `{ triggered, reasons[] }`. Three independent triggers: high fatigue, genuine 1RM decline, 7-week hard cap.
+- **`warmup.warmupSets(workingWeight)`** — barbell ramp-up sets (bar ×10, then 40/60/80% with falling reps, deduped and clamped). Shown on `percent` exercise cards. Each session in `workout.js` also has a `warmup: [{ name, detail }]` array rendered as a checklist at the top of the session.
 
 ## Deload Logic
 
@@ -113,9 +116,12 @@ Tests live alongside source files as `*.test.js`. Currently: `src/utils/deload.t
 
 ## CSS Conventions
 
-All styles in `src/index.css`. CSS custom properties defined on `:root`:
-- `--bg`, `--bg2`, `--bg3` — background layers
+All styles in `src/index.css`. Dark near-black theme with pale "light surface" accents (dribbble-style): accent elements are light cards/pills with dark text (`--on-accent`), not coloured text on dark. Font is Poppins (Google Fonts link in `index.html`). CSS custom properties defined on `:root`:
+- `--bg`, `--bg2`, `--bg3` — background layers (near-black → panel → input)
 - `--text`, `--text2` — primary / muted text
-- `--accent`, `--accent2` — green highlights
+- `--accent`, `--accent2` — pale ice-blue highlight surface (+ pressed state)
+- `--lavender` — pale lavender secondary surface
+- `--on-accent` — dark text used on the light accent surfaces
 - `--danger` — red
 - `--warn` — amber
+- `--radius`, `--radius-sm`, `--pill` — 24px cards, 14px inputs, fully-rounded pills

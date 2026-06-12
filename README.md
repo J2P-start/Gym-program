@@ -1,14 +1,13 @@
 # BJJ Gym Tracker
 
-A mobile-first React web app for two users to track a shared 3-day-per-week gym programme designed to supplement BJJ training. Each user has their own profile, 1RM records, session logs, and progress charts — all stored locally in the browser.
+A mobile-first React web app for tracking a 3-day-per-week gym programme designed to supplement BJJ training. 1RM records, session logs, and progress charts are all stored locally in the browser.
 
 ---
 
 ## Features
 
-- **Two-user profiles** — simple name-based switching, no passwords
 - **Fixed weekly programme** — Push & Legs, Pull & Posterior Chain, Athletic & Power
-- **Auto-calculated working weights** — derived from each user's individual 1RMs using the Epley formula
+- **Auto-calculated working weights** — derived from your 1RMs using the Epley formula
 - **Passive 1RM estimation** — no dedicated testing week; 1RMs update automatically from logged sets
 - **Session logging** — log weight and reps per set, with a built-in rest timer
 - **Fatigue tracking** — rate each session 1–5 at the end
@@ -98,7 +97,7 @@ estimated 1RM = weight × (1 + reps / 30)
 
 ## Progressive Overload & Deloads
 
-**Progression:** Add 2.5 kg (upper body) or 5 kg (lower body) when the top of the rep range is hit cleanly across all sets for two consecutive sessions.
+**Progression (automatic):** For percent-based lifts, the working percentage ramps across the training block — starting at the low end of the exercise's range and rising **+2.5 percentage points every 2 trained weeks**, capped at the high end (e.g. back squat `80–85%`: weeks 1–2 at 80%, weeks 3–4 at 82.5%, week 5+ at 85%). The week counter only counts calendar weeks you actually trained in, so missed weeks never advance the ramp. A deload resets the block to week 1, restarting the wave from the low end — ideally with a higher estimated 1RM underneath. Manual rule for accessories: add 2.5 kg (upper body) or 5 kg (lower body) when the top of the rep range is hit cleanly across all sets for two consecutive sessions.
 
 **Deload triggers (app monitors automatically):**
 - Same lift stalls for 3 consecutive sessions

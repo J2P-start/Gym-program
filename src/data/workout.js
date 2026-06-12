@@ -8,7 +8,8 @@ export const TRACKED_LIFTS = [
 ];
 
 // loadType: 'percent' | 'bodyweight' | 'note'
-// percentRange: [low, high] — working weight uses low end; high shown for context
+// percentRange: [low, high] — % of 1RM ramps from low to high across the block
+// (+2.5 points every 2 weeks, capped at high; see utils/progression.js)
 // isLower: used for progression increment (5kg lower, 2.5kg upper)
 
 export const SESSIONS = [
@@ -17,6 +18,15 @@ export const SESSIONS = [
     name: 'Push & Legs',
     duration: '~60 min',
     note: 'Low grip fatigue before Tuesday BJJ. Leg drive for takedowns and hip escapes.',
+    warmup: [
+      { name: 'Easy bike or row', detail: '3–4 min, conversational pace' },
+      { name: 'Leg swings', detail: '10 front-to-back + 10 side-to-side each leg' },
+      { name: 'Bodyweight squats', detail: '10 slow, full depth' },
+      { name: 'Hip 90/90 switches', detail: '5 each side' },
+      { name: "World's greatest stretch", detail: '5 each side' },
+      { name: 'Band pull-aparts', detail: '15 — shoulders ready for bench' },
+      { name: 'Scap push-ups', detail: '10' },
+    ],
     exercises: [
       { name: 'Back squat',          sets: 4, reps: 4,          repLabel: '4',           loadType: 'percent', percentRange: [80, 85], restSeconds: 180, isLower: true },
       { name: 'Romanian deadlift',   sets: 3, reps: 8,          repLabel: '8',           loadType: 'percent', percentRange: [70, 70], restSeconds: 120, isLower: true },
@@ -31,6 +41,15 @@ export const SESSIONS = [
     name: 'Pull & Posterior Chain',
     duration: '~65 min',
     note: 'Most BJJ-relevant session. Grip strength, pulling power, posterior chain.',
+    warmup: [
+      { name: 'Easy row', detail: '3–4 min, conversational pace' },
+      { name: 'Cat-cow', detail: '10 slow reps' },
+      { name: 'Glute bridges', detail: '15 — wake the hips before pulling' },
+      { name: 'Bird dog', detail: '8 each side' },
+      { name: 'Hamstring scoops', detail: '10 each leg, walking' },
+      { name: 'Band pull-aparts', detail: '15' },
+      { name: 'Easy dead hang', detail: '20–30 sec — open the lats, prep grip' },
+    ],
     exercises: [
       { name: 'Trap bar deadlift',        sets: 4, reps: 4,  repLabel: '4',           loadType: 'percent',    percentRange: [80, 85], restSeconds: 180, isLower: true },
       { name: 'Weighted pull-ups',        sets: 4, reps: 6,  repLabel: '5–6',          loadType: 'added',      addedNote: '+10–20 kg added weight', restSeconds: 150 },
@@ -45,6 +64,15 @@ export const SESSIONS = [
     name: 'Athletic & Power',
     duration: '~55 min',
     note: "Explosive. Kept shorter — don't bury yourself before Saturday BJJ.",
+    warmup: [
+      { name: 'Skipping or easy bike', detail: '3 min, build the heart rate' },
+      { name: 'Leg swings', detail: '10 each direction per leg' },
+      { name: 'Gate swings (hip openers)', detail: '10' },
+      { name: 'Pogo hops', detail: '2 × 15 — springy ankles for jumps' },
+      { name: 'Squat to vertical jump', detail: '5 easy efforts, ramping intent' },
+      { name: 'Wrist & front-rack stretch', detail: '30 sec — clean catch position' },
+      { name: 'Empty-bar clean positions', detail: '5 reps each: shrug, high pull, catch' },
+    ],
     exercises: [
       { name: 'Power clean / hang clean', sets: 4, reps: 3,  repLabel: '3',               loadType: 'percent',    percentRange: [70, 70], restSeconds: 150, isLower: false },
       { name: 'Box jump',                 sets: 3, reps: 5,  repLabel: '5',               loadType: 'bodyweight',                          restSeconds: 90 },

@@ -1,3 +1,5 @@
+import { localDateStr } from './dates';
+
 const KEY_USERS = 'bjj_users';
 const key1RM = (u) => `bjj_1rm_${u}`;
 const keyLog = (u) => `bjj_log_${u}`;
@@ -52,7 +54,7 @@ export function addLog(username, entry) {
 
 export function getLastSession(username, sessionName) {
   const logs = getLogs(username);
-  const today = new Date().toISOString().slice(0, 10);
+  const today = localDateStr();
   for (let i = logs.length - 1; i >= 0; i--) {
     if (logs[i].session === sessionName && logs[i].date !== today) return logs[i];
   }
@@ -60,7 +62,7 @@ export function getLastSession(username, sessionName) {
 }
 
 export function getBlock(username) {
-  return get(keyBlock(username), { week: 1, startDate: new Date().toISOString().slice(0, 10), lastDeloadDate: null });
+  return get(keyBlock(username), { week: 1, startDate: localDateStr(), lastDeloadDate: null });
 }
 export function setBlock(username, data) { set(keyBlock(username), data); }
 

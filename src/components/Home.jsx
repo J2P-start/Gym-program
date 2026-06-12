@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
 import { WEEK_SCHEDULE, SESSIONS } from '../data/workout';
-import { getBlock } from '../utils/storage';
 import { checkDeload } from '../utils/deload';
+import { trainingWeek } from '../utils/progression';
+import { localDateStr } from '../utils/dates';
 
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const WEEKS_TO_SHOW = 4;
@@ -18,10 +19,10 @@ function getWeekDays(offsetWeeks) {
   });
 }
 
-export default function Home({ user, onStartSession, onDismissDeload, deloadDismissed, onSwitchUser, lastFinished }) {
+export default function Home({ user, onStartSession, onDismissDeload, deloadDismissed, lastFinished }) {
   const todayName = DAY_NAMES[new Date().getDay()];
-  const todayDateStr = new Date().toISOString().slice(0, 10);
-  const block = useMemo(() => getBlock(user), [user, lastFinished]);
+  const todayDateStr = localDateStr();
+  const week = useMemo(() => trainingWeek(user), [user, lastFinished]);
   const deload = useMemo(() => checkDeload(user), [user, lastFinished]);
 
   // Default selected day to today's schedule index (0=Mon…6=Sun)
@@ -40,8 +41,8 @@ export default function Home({ user, onStartSession, onDismissDeload, deloadDism
   return (
     <div className="home">
       <div className="home-header">
-        <span className="block-badge">Block week {block.week}</span>
-        <button className="user-badge-btn" onClick={onSwitchUser}>{user} ↓</button>
+        <span className="block-badge">Block week {week}</span>
+        <span className="user-badge">{user}</span>
       </div>
 
       {deload.triggered && !deloadDismissed && (
@@ -64,7 +65,7 @@ export default function Home({ user, onStartSession, onDismissDeload, deloadDism
             <div className="week-strip">
               {days.map((date, di) => {
                 const schedule = WEEK_SCHEDULE[di];
-                const dateStr = date.toISOString().slice(0, 10);
+                const dateStr = localDateStr(date);
                 const isToday = dateStr === todayDateStr;
                 const isSelected = di === selectedDayIndex;
                 return (
