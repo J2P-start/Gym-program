@@ -1,13 +1,47 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { TRACKED_LIFTS } from '../data/workout';
-import { get1RMs, setAll1RMs, getBlock, setBlock, renameUser, getUsers } from '../utils/storage';
-import { epley } from '../utils/oneRM';
+import { get1RMs, setAll1RMs, getBlock, setBlock, getLogs, renameUser, getUsers } from '../utils/storage';
+import { epley, bestEstimated1RM } from '../utils/oneRM';
+import { trainingWeek } from '../utils/progression';
+import { localDateStr } from '../utils/dates';
+
+function RMDelta({ baseline, current }) {
+  if (!baseline || !current) return null;
+  const diff = Math.round((current - baseline) * 10) / 10;
+  if (diff === 0) return <div className="rm-delta">— no change since first session</div>;
+  const pct = ((diff / baseline) * 100).toFixed(1);
+  const sign = diff > 0 ? '+' : '';
+  return (
+    <div className={`rm-delta ${diff > 0 ? 'up' : 'down'}`}>
+      {diff > 0 ? '▲' : '▼'} {sign}{diff.toFixed(1)} kg ({sign}{pct}%) since first session
+    </div>
+  );
+}
 
 export default function Settings({ user, onUserChange, onSwitchUser }) {
   const [oneRMs, setOneRMs] = useState(() => get1RMs(user));
   const [repMaxInputs, setRepMaxInputs] = useState({});
   const [newName, setNewName] = useState(user);
   const [saved, setSaved] = useState(false);
+
+  // Baseline 1RM per lift, estimated from the raw sets of the earliest session
+  // that logged the lift. (The stored estimatedOneRM field can't be used here:
+  // it's only written when a session sets a new PR, so it would measure
+  // progress from the first PR instead of the first session.)
+  const baselines = useMemo(() => {
+    const logs = getLogs(user)
+      .filter((l) => !l.isDeload)
+      .sort((a, b) => a.date.localeCompare(b.date));
+    const map = {};
+    for (const log of logs) {
+      for (const e of log.exercises ?? []) {
+        if (map[e.name] !== undefined || !e.sets?.length) continue;
+        const est = bestEstimated1RM(e.sets.map((s) => ({ weight: s.actualWeight, reps: s.reps })));
+        if (est != null) map[e.name] = est;
+      }
+    }
+    return map;
+  }, [user]);
 
   function handleRMChange(lift, val) {
     const parsed = parseFloat(val);
@@ -47,7 +81,7 @@ export default function Settings({ user, onUserChange, onSwitchUser }) {
 
   function resetBlock() {
     if (!window.confirm('Reset block counter to week 1?')) return;
-    setBlock(user, { ...getBlock(user), week: 1, startDate: new Date().toISOString().slice(0, 10) });
+    setBlock(user, { ...getBlock(user), week: 1, startDate: localDateStr() });
     alert('Block reset to week 1');
   }
 
@@ -87,6 +121,7 @@ export default function Settings({ user, onUserChange, onSwitchUser }) {
               />
               <button className="btn-calc" onClick={() => calcFromRepMax(lift)}>Calc</button>
             </div>
+            <RMDelta baseline={baselines[lift]} current={oneRMs[lift]} />
           </div>
         ))}
         <button className="btn-primary" onClick={saveRMs}>{saved ? 'Saved ✓' : 'Save 1RMs'}</button>
@@ -108,7 +143,7 @@ export default function Settings({ user, onUserChange, onSwitchUser }) {
 
       <section className="settings-section">
         <h3>Block</h3>
-        <p>Current block week: <strong>{getBlock(user).week}</strong></p>
+        <p>Current block week: <strong>{trainingWeek(user)}</strong></p>
         <button className="btn-secondary" onClick={resetBlock}>Reset block to week 1</button>
       </section>
 

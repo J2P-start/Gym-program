@@ -1,18 +1,19 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { SESSIONS, TRACKED_LIFTS } from '../data/workout';
 import { get1RMs, set1RM, addLog, getBlock, setBlock, getLastSession, storageAvailable } from '../utils/storage';
-import { workingWeight, bestEstimated1RM } from '../utils/oneRM';
+import { bestEstimated1RM } from '../utils/oneRM';
+import { blockPercent, blockWeight, trainingWeek } from '../utils/progression';
+import { localDateStr } from '../utils/dates';
 
-function calcWeight(exercise, oneRMs, isDeload) {
+function calcWeight(exercise, oneRMs, isDeload, week) {
   if (exercise.loadType !== 'percent') return null;
-  const pct = isDeload ? 60 : exercise.percentRange[0];
   const rm = oneRMs[exercise.name];
   if (!rm) return null;
-  return workingWeight(rm, pct);
+  return blockWeight(rm, exercise.percentRange, week, isDeload);
 }
 
-function SetRow({ setNum, exercise, oneRMs, isDeload, prevWeight, onComplete }) {
-  const suggested = calcWeight(exercise, oneRMs, isDeload);
+function SetRow({ setNum, exercise, oneRMs, isDeload, week, prevWeight, onComplete }) {
+  const suggested = calcWeight(exercise, oneRMs, isDeload, week);
   const [weight, setWeight] = useState(suggested ?? prevWeight ?? '');
   const [reps, setReps] = useState(exercise.reps ?? '');
   const [done, setDone] = useState(false);
@@ -95,7 +96,7 @@ function RestTimer({ seconds, onDone }) {
   );
 }
 
-function ExerciseCard({ exercise, oneRMs, isDeload, prevSets, onSetsComplete }) {
+function ExerciseCard({ exercise, oneRMs, isDeload, week, prevSets, onSetsComplete }) {
   const setCount = isDeload ? Math.max(1, exercise.sets - 1) : exercise.sets;
   const [completedSets, setCompletedSets] = useState([]);
   const [showTimer, setShowTimer] = useState(false);
@@ -107,8 +108,8 @@ function ExerciseCard({ exercise, oneRMs, isDeload, prevSets, onSetsComplete }) 
     if (next.length === setCount) onSetsComplete(exercise.name, next);
   }
 
-  const suggested = calcWeight(exercise, oneRMs, isDeload);
-  const pct = exercise.loadType === 'percent' ? (isDeload ? 60 : exercise.percentRange[0]) : null;
+  const suggested = calcWeight(exercise, oneRMs, isDeload, week);
+  const pct = exercise.loadType === 'percent' ? blockPercent(exercise.percentRange, week, isDeload) : null;
   const loadLabel = (() => {
     if (exercise.loadType === 'percent') {
       return suggested ? `${pct}% → ${suggested} kg` : `${pct}% 1RM — set your 1RM`;
@@ -156,6 +157,7 @@ function ExerciseCard({ exercise, oneRMs, isDeload, prevSets, onSetsComplete }) 
             exercise={exercise}
             oneRMs={oneRMs}
             isDeload={isDeload}
+            week={week}
             prevWeight={prevSets?.[i]?.actualWeight ?? null}
             onComplete={handleSetDone}
           />
@@ -174,6 +176,7 @@ export default function SessionScreen({ user, sessionIndex, isDeload, onFinish, 
   const [exerciseSets, setExerciseSets] = useState({});
   const [showFatigue, setShowFatigue] = useState(false);
   const [estimatedSummary, setEstimatedSummary] = useState({});
+  const blockWeek = useMemo(() => trainingWeek(user), [user]);
 
   const prevExercises = useMemo(() => {
     const sessionName = `${session.day} — ${session.name}`;
@@ -209,10 +212,10 @@ export default function SessionScreen({ user, sessionIndex, isDeload, onFinish, 
     const block = getBlock(user);
     const entry = {
       user,
-      date: new Date().toISOString().slice(0, 10),
+      date: localDateStr(),
       session: `${session.day} — ${session.name}`,
       fatigueRating: rating,
-      blockWeek: block.week,
+      blockWeek,
       isDeload,
       exercises: session.exercises.map((e) => ({
         name: e.name,
@@ -227,7 +230,7 @@ export default function SessionScreen({ user, sessionIndex, isDeload, onFinish, 
     }
 
     if (isDeload) {
-      setBlock(user, { week: 1, startDate: new Date().toISOString().slice(0, 10), lastDeloadDate: new Date().toISOString().slice(0, 10) });
+      setBlock(user, { week: 1, startDate: localDateStr(), lastDeloadDate: localDateStr() });
     } else {
       setBlock(user, { ...block, week: block.week + 1 });
     }
@@ -281,6 +284,7 @@ export default function SessionScreen({ user, sessionIndex, isDeload, onFinish, 
             exercise={ex}
             oneRMs={oneRMs}
             isDeload={isDeload}
+            week={blockWeek}
             prevSets={prevExercises[ex.name] ?? null}
             onSetsComplete={handleSetsComplete}
           />

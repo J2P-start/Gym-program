@@ -98,7 +98,7 @@ estimated 1RM = weight × (1 + reps / 30)
 
 ## Progressive Overload & Deloads
 
-**Progression:** Add 2.5 kg (upper body) or 5 kg (lower body) when the top of the rep range is hit cleanly across all sets for two consecutive sessions.
+**Progression (automatic):** For percent-based lifts, the working percentage ramps across the training block — starting at the low end of the exercise's range and rising **+2.5 percentage points every 2 trained weeks**, capped at the high end (e.g. back squat `80–85%`: weeks 1–2 at 80%, weeks 3–4 at 82.5%, week 5+ at 85%). The week counter only counts calendar weeks you actually trained in, so missed weeks never advance the ramp. A deload resets the block to week 1, restarting the wave from the low end — ideally with a higher estimated 1RM underneath. Manual rule for accessories: add 2.5 kg (upper body) or 5 kg (lower body) when the top of the rep range is hit cleanly across all sets for two consecutive sessions.
 
 **Deload triggers (app monitors automatically):**
 - Same lift stalls for 3 consecutive sessions
