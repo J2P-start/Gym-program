@@ -13,7 +13,7 @@ function WarmupChecklist({ items }) {
 
   return (
     <div className="exercise-card warmup-card">
-      <button className="warmup-header" onClick={() => setCollapsed((c) => !c)}>
+      <button className="card-header" onClick={() => setCollapsed((c) => !c)}>
         <h3>Warm-up</h3>
         <span className="exercise-meta">{doneCount}/{items.length} {collapsed ? '▸' : '▾'}</span>
       </button>
@@ -90,20 +90,30 @@ function SetRow({ setNum, exercise, oneRMs, isDeload, week, prevWeight, onChange
 function ExerciseCard({ exercise, oneRMs, isDeload, week, prevSets, onSetsChange }) {
   const setCount = isDeload ? Math.max(1, exercise.sets - 1) : exercise.sets;
   const [completedSets, setCompletedSets] = useState({});
+  const [collapsed, setCollapsed] = useState(false);
+  const isComplete = Object.keys(completedSets).length === setCount;
 
   function handleSetChange(setNum, data) {
-    const next = { ...completedSets };
-    if (data) next[setNum] = data;
-    else delete next[setNum];
-    setCompletedSets(next);
-    // Report the full ordered set list when every set is done, else retract
+    setCompletedSets((prev) => {
+      const next = { ...prev };
+      if (data) next[setNum] = data;
+      else delete next[setNum];
+      return next;
+    });
+  }
+
+  // Report the full ordered set list when every set is done, else retract.
+  // Runs as an effect so back-to-back set ticks can't race each other.
+  useEffect(() => {
+    const full = Object.keys(completedSets).length === setCount;
+    // Auto-collapse a finished exercise to keep the screen tidy
+    if (full) setCollapsed(true);
     onSetsChange(
       exercise.name,
-      Object.keys(next).length === setCount
-        ? Array.from({ length: setCount }, (_, i) => next[i + 1])
-        : null
+      full ? Array.from({ length: setCount }, (_, i) => completedSets[i + 1]) : null
     );
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- onSetsChange is recreated by the parent each render; including it would loop
+  }, [completedSets, setCount, exercise.name]);
 
   const suggested = calcWeight(exercise, oneRMs, isDeload, week);
   const pct = exercise.loadType === 'percent' ? blockPercent(exercise.percentRange, week, isDeload) : null;
@@ -138,35 +148,41 @@ function ExerciseCard({ exercise, oneRMs, isDeload, week, prevSets, onSetsChange
 
   return (
     <div className="exercise-card">
-      <div className="exercise-header">
+      <button className="card-header" onClick={() => setCollapsed((c) => !c)}>
         <h3>{exercise.name}</h3>
-        <span className="exercise-meta">{setCount} × {exercise.repLabel}</span>
-      </div>
-      <div className="exercise-info-row">
-        <span className="load-label">{loadLabel}</span>
-        {restLabel && <span className="rest-label">{restLabel}</span>}
-      </div>
-      {rampLine && <span className="warmup-ramp">Warm-up: {rampLine}</span>}
-      {prevHint && <span className="prev-weight-hint">{prevHint}</span>}
-      <div className="sets-list">
-        <div className="set-header-row">
-          <span className="set-num" />
-          <span className="set-col-label">kg</span>
-          <span className="set-col-label">reps</span>
-          <span className="set-done-spacer" />
-        </div>
-        {Array.from({ length: setCount }, (_, i) => (
-          <SetRow
-            key={i}
-            setNum={i + 1}
-            exercise={exercise}
-            oneRMs={oneRMs}
-            isDeload={isDeload}
-            week={week}
-            prevWeight={prevSets?.[i]?.actualWeight ?? null}
-            onChange={handleSetChange}
-          />
-        ))}
+        <span className="exercise-meta">
+          {isComplete && <span className="card-check">✓ </span>}
+          {setCount} × {exercise.repLabel} {collapsed ? '▸' : '▾'}
+        </span>
+      </button>
+      {/* Hidden, not unmounted — SetRow keeps its ticked/typed state while collapsed */}
+      <div className={`card-body${collapsed ? ' hidden' : ''}`}>
+          <div className="exercise-info-row">
+            <span className="load-label">{loadLabel}</span>
+            {restLabel && <span className="rest-label">{restLabel}</span>}
+          </div>
+          {rampLine && <span className="warmup-ramp">Warm-up: {rampLine}</span>}
+          {prevHint && <span className="prev-weight-hint">{prevHint}</span>}
+          <div className="sets-list">
+            <div className="set-header-row">
+              <span className="set-num" />
+              <span className="set-col-label">kg</span>
+              <span className="set-col-label">reps</span>
+              <span className="set-done-spacer" />
+            </div>
+            {Array.from({ length: setCount }, (_, i) => (
+              <SetRow
+                key={i}
+                setNum={i + 1}
+                exercise={exercise}
+                oneRMs={oneRMs}
+                isDeload={isDeload}
+                week={week}
+                prevWeight={prevSets?.[i]?.actualWeight ?? null}
+                onChange={handleSetChange}
+              />
+            ))}
+          </div>
       </div>
     </div>
   );
