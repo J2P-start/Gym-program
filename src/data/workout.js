@@ -8,7 +8,8 @@ export const TRACKED_LIFTS = [
 ];
 
 // loadType: 'percent' | 'bodyweight' | 'note'
-// percentRange: [low, high] — working weight uses low end; high shown for context
+// percentRange: [low, high] — % of 1RM ramps from low to high across the block
+// (+2.5 points every 2 weeks, capped at high; see utils/progression.js)
 // isLower: used for progression increment (5kg lower, 2.5kg upper)
 
 export const SESSIONS = [

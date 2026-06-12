@@ -79,7 +79,7 @@ Defined in `src/data/workout.js`. Each exercise has a `loadType`:
 
 | loadType | Behaviour | Weight input |
 |----------|-----------|--------------|
-| `'percent'` | Weight calculated from 1RM × percentRange | Auto-filled from 1RM |
+| `'percent'` | Weight from 1RM × ramped % — `blockPercent()` ramps from percentRange low to high (+2.5 pts every 2 block weeks) | Auto-filled from 1RM |
 | `'bodyweight'` | Displays "Bodyweight" | No weight tracking |
 | `'note'` | Displays guidance text (e.g. "Moderate-heavy") | Manual entry; shows "Last: X kg" hint from previous session |
 | `'added'` | For weighted accessories (e.g. "+10–20 kg added") | Manual entry |
@@ -91,6 +91,7 @@ Defined in `src/data/workout.js`. Each exercise has a `loadType`:
 - **`storage.getLastSession(username, sessionName)`** — finds the most recent log entry for a given session name, excluding today. Used to show previous weights for `note`-type exercises.
 - **`oneRM.workingWeight(rm, pct)`** — returns the working weight for a given 1RM and percentage (rounded to nearest 2.5 kg).
 - **`oneRM.bestEstimated1RM(sets)`** — returns the highest Epley-estimated 1RM across all sets (only sets with ≤ 10 reps).
+- **`progression.blockPercent(percentRange, week, isDeload)`** — % of 1RM for a given block week: ramps from `percentRange[0]` by +2.5 points every 2 weeks, capped at `percentRange[1]`; always 60 on deload. `progression.blockWeight(rm, range, week, isDeload)` converts that to kg.
 - **`deload.checkDeload(username)`** — returns `{ triggered, reasons[] }`. Three independent triggers: high fatigue, genuine 1RM decline, 7-week hard cap.
 
 ## Deload Logic
