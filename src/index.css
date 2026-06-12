@@ -150,20 +150,6 @@ html, body, #root {
 .profile-selector h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; }
 .subtitle { color: var(--text2); font-size: 15px; }
 
-.profile-buttons { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 280px; }
-.profile-btn {
-  padding: 20px;
-  font-size: 20px;
-  font-weight: 600;
-  background: var(--bg2);
-  border: 2px solid transparent;
-  border-radius: var(--radius);
-  color: var(--text);
-  cursor: pointer;
-  transition: border-color 0.15s;
-}
-.profile-btn:active { border-color: var(--accent); }
-
 .setup-inputs { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 280px; }
 .name-input {
   width: 100%;
@@ -191,15 +177,13 @@ html, body, #root {
   font-size: 13px;
   color: var(--text2);
 }
-.user-badge-btn {
+.user-badge {
   background: var(--lavender);
-  border: none;
   border-radius: var(--pill);
   padding: 6px 14px;
   font-size: 13px;
   color: var(--on-accent);
   font-weight: 600;
-  cursor: pointer;
 }
 .btn-back-top {
   align-self: flex-start;
@@ -627,5 +611,3 @@ html, body, #root {
 }
 .name-edit-row .name-input { flex: 1; margin-bottom: 0; }
 .name-edit-row .btn-primary { width: auto; padding: 14px 22px; }
-
-.switch-btn { color: var(--on-accent); background: var(--lavender); }
