@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { TRACKED_LIFTS } from '../data/workout';
 import { get1RMs, setAll1RMs, getBlock, setBlock, renameUser, getUsers } from '../utils/storage';
 import { epley } from '../utils/oneRM';
+import { trainingWeek } from '../utils/progression';
 
 export default function Settings({ user, onUserChange, onSwitchUser }) {
   const [oneRMs, setOneRMs] = useState(() => get1RMs(user));
@@ -108,7 +109,7 @@ export default function Settings({ user, onUserChange, onSwitchUser }) {
 
       <section className="settings-section">
         <h3>Block</h3>
-        <p>Current block week: <strong>{getBlock(user).week}</strong></p>
+        <p>Current block week: <strong>{trainingWeek(user)}</strong></p>
         <button className="btn-secondary" onClick={resetBlock}>Reset block to week 1</button>
       </section>
 

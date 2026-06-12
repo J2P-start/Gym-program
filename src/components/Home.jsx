@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { WEEK_SCHEDULE, SESSIONS } from '../data/workout';
-import { getBlock } from '../utils/storage';
 import { checkDeload } from '../utils/deload';
+import { trainingWeek } from '../utils/progression';
 
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const WEEKS_TO_SHOW = 4;
@@ -21,7 +21,7 @@ function getWeekDays(offsetWeeks) {
 export default function Home({ user, onStartSession, onDismissDeload, deloadDismissed, onSwitchUser, lastFinished }) {
   const todayName = DAY_NAMES[new Date().getDay()];
   const todayDateStr = new Date().toISOString().slice(0, 10);
-  const block = useMemo(() => getBlock(user), [user, lastFinished]);
+  const week = useMemo(() => trainingWeek(user), [user, lastFinished]);
   const deload = useMemo(() => checkDeload(user), [user, lastFinished]);
 
   // Default selected day to today's schedule index (0=Mon…6=Sun)
@@ -40,7 +40,7 @@ export default function Home({ user, onStartSession, onDismissDeload, deloadDism
   return (
     <div className="home">
       <div className="home-header">
-        <span className="block-badge">Block week {block.week}</span>
+        <span className="block-badge">Block week {week}</span>
         <button className="user-badge-btn" onClick={onSwitchUser}>{user} ↓</button>
       </div>
 

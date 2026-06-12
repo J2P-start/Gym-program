@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { SESSIONS, TRACKED_LIFTS } from '../data/workout';
 import { get1RMs, set1RM, addLog, getBlock, setBlock, getLastSession, storageAvailable } from '../utils/storage';
 import { bestEstimated1RM } from '../utils/oneRM';
-import { blockPercent, blockWeight } from '../utils/progression';
+import { blockPercent, blockWeight, trainingWeek } from '../utils/progression';
 
 function calcWeight(exercise, oneRMs, isDeload, week) {
   if (exercise.loadType !== 'percent') return null;
@@ -175,7 +175,7 @@ export default function SessionScreen({ user, sessionIndex, isDeload, onFinish, 
   const [exerciseSets, setExerciseSets] = useState({});
   const [showFatigue, setShowFatigue] = useState(false);
   const [estimatedSummary, setEstimatedSummary] = useState({});
-  const blockWeek = useMemo(() => getBlock(user).week, [user]);
+  const blockWeek = useMemo(() => trainingWeek(user), [user]);
 
   const prevExercises = useMemo(() => {
     const sessionName = `${session.day} — ${session.name}`;
@@ -214,7 +214,7 @@ export default function SessionScreen({ user, sessionIndex, isDeload, onFinish, 
       date: new Date().toISOString().slice(0, 10),
       session: `${session.day} — ${session.name}`,
       fatigueRating: rating,
-      blockWeek: block.week,
+      blockWeek,
       isDeload,
       exercises: session.exercises.map((e) => ({
         name: e.name,

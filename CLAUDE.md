@@ -92,6 +92,7 @@ Defined in `src/data/workout.js`. Each exercise has a `loadType`:
 - **`oneRM.workingWeight(rm, pct)`** — returns the working weight for a given 1RM and percentage (rounded to nearest 2.5 kg).
 - **`oneRM.bestEstimated1RM(sets)`** — returns the highest Epley-estimated 1RM across all sets (only sets with ≤ 10 reps).
 - **`progression.blockPercent(percentRange, week, isDeload)`** — % of 1RM for a given block week: ramps from `percentRange[0]` by +2.5 points every 2 weeks, capped at `percentRange[1]`; always 60 on deload. `progression.blockWeight(rm, range, week, isDeload)` converts that to kg.
+- **`progression.trainingWeek(username)`** — the block week used for the ramp and all "Block week N" displays: 1 + distinct *past* calendar weeks (Mon–Sun) with a non-deload session since `block.startDate`. Counts weeks actually trained, so missed weeks don't advance the ramp; the stored `block.week` session counter is legacy.
 - **`deload.checkDeload(username)`** — returns `{ triggered, reasons[] }`. Three independent triggers: high fatigue, genuine 1RM decline, 7-week hard cap.
 
 ## Deload Logic

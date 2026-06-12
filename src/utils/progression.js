@@ -1,6 +1,38 @@
 import { round2_5 } from './oneRM';
+import { getLogs, getBlock } from './storage';
 
 export const DELOAD_PERCENT = 60;
+
+function localDateStr(d = new Date()) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+/** Monday of the week containing a YYYY-MM-DD date, as YYYY-MM-DD */
+export function weekStart(dateStr) {
+  const [y, m, day] = dateStr.split('-').map(Number);
+  const d = new Date(y, m - 1, day);
+  d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+  return localDateStr(d);
+}
+
+/**
+ * Current week of the training block, counted from weeks actually trained:
+ * 1 + the number of distinct past calendar weeks (Mon–Sun) containing at
+ * least one non-deload session since the block started. The current week
+ * never counts itself, so every session within a week shares one percentage,
+ * and weeks with no training don't advance the ramp.
+ */
+export function trainingWeek(username, todayStr = localDateStr()) {
+  const { startDate } = getBlock(username);
+  const thisWeek = weekStart(todayStr);
+  const pastWeeks = new Set(
+    getLogs(username)
+      .filter((l) => !l.isDeload && (!startDate || l.date >= startDate))
+      .map((l) => weekStart(l.date))
+      .filter((w) => w < thisWeek)
+  );
+  return pastWeeks.size + 1;
+}
 
 /**
  * Percentage of 1RM for a percent-loaded exercise in a given block week.
