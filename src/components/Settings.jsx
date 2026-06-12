@@ -1,14 +1,41 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { TRACKED_LIFTS } from '../data/workout';
-import { get1RMs, setAll1RMs, getBlock, setBlock, renameUser, getUsers } from '../utils/storage';
+import { get1RMs, setAll1RMs, getBlock, setBlock, getLogs, renameUser, getUsers } from '../utils/storage';
 import { epley } from '../utils/oneRM';
 import { trainingWeek } from '../utils/progression';
+
+function RMDelta({ baseline, current }) {
+  if (!baseline || !current) return null;
+  const diff = Math.round((current - baseline) * 10) / 10;
+  if (diff === 0) return <div className="rm-delta">— no change since first session</div>;
+  const pct = ((diff / baseline) * 100).toFixed(1);
+  const sign = diff > 0 ? '+' : '';
+  return (
+    <div className={`rm-delta ${diff > 0 ? 'up' : 'down'}`}>
+      {diff > 0 ? '▲' : '▼'} {sign}{diff.toFixed(1)} kg ({sign}{pct}%) since first session
+    </div>
+  );
+}
 
 export default function Settings({ user, onUserChange, onSwitchUser }) {
   const [oneRMs, setOneRMs] = useState(() => get1RMs(user));
   const [repMaxInputs, setRepMaxInputs] = useState({});
   const [newName, setNewName] = useState(user);
   const [saved, setSaved] = useState(false);
+
+  // Earliest logged 1RM estimate per lift — the baseline each delta is measured from
+  const baselines = useMemo(() => {
+    const logs = getLogs(user)
+      .filter((l) => !l.isDeload)
+      .sort((a, b) => a.date.localeCompare(b.date));
+    const map = {};
+    for (const log of logs) {
+      for (const e of log.exercises ?? []) {
+        if (e.estimatedOneRM != null && map[e.name] === undefined) map[e.name] = e.estimatedOneRM;
+      }
+    }
+    return map;
+  }, [user]);
 
   function handleRMChange(lift, val) {
     const parsed = parseFloat(val);
@@ -88,6 +115,7 @@ export default function Settings({ user, onUserChange, onSwitchUser }) {
               />
               <button className="btn-calc" onClick={() => calcFromRepMax(lift)}>Calc</button>
             </div>
+            <RMDelta baseline={baselines[lift]} current={oneRMs[lift]} />
           </div>
         ))}
         <button className="btn-primary" onClick={saveRMs}>{saved ? 'Saved ✓' : 'Save 1RMs'}</button>

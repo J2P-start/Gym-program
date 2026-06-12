@@ -578,6 +578,10 @@ html, body, #root {
 .rm-input.small { width: 70px; font-size: 14px; }
 .rm-unit { font-size: 13px; color: var(--text2); margin-left: 6px; }
 
+.rm-delta { font-size: 13px; color: var(--text2); margin-top: 6px; }
+.rm-delta.up { color: var(--accent); }
+.rm-delta.down { color: var(--danger); }
+
 .rep-max-row {
   display: flex;
   align-items: center;
