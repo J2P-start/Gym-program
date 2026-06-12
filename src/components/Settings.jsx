@@ -18,7 +18,7 @@ function RMDelta({ baseline, current }) {
   );
 }
 
-export default function Settings({ user, onUserChange, onSwitchUser }) {
+export default function Settings({ user, onUserChange }) {
   const [oneRMs, setOneRMs] = useState(() => get1RMs(user));
   const [repMaxInputs, setRepMaxInputs] = useState({});
   const [newName, setNewName] = useState(user);
@@ -147,9 +147,6 @@ export default function Settings({ user, onUserChange, onSwitchUser }) {
         <button className="btn-secondary" onClick={resetBlock}>Reset block to week 1</button>
       </section>
 
-      <section className="settings-section">
-        <button className="btn-secondary switch-btn" onClick={onSwitchUser}>Switch user</button>
-      </section>
     </div>
   );
 }

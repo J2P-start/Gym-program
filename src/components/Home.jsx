@@ -19,7 +19,7 @@ function getWeekDays(offsetWeeks) {
   });
 }
 
-export default function Home({ user, onStartSession, onDismissDeload, deloadDismissed, onSwitchUser, lastFinished }) {
+export default function Home({ user, onStartSession, onDismissDeload, deloadDismissed, lastFinished }) {
   const todayName = DAY_NAMES[new Date().getDay()];
   const todayDateStr = localDateStr();
   const week = useMemo(() => trainingWeek(user), [user, lastFinished]);
@@ -42,7 +42,7 @@ export default function Home({ user, onStartSession, onDismissDeload, deloadDism
     <div className="home">
       <div className="home-header">
         <span className="block-badge">Block week {week}</span>
-        <button className="user-badge-btn" onClick={onSwitchUser}>{user} ↓</button>
+        <span className="user-badge">{user}</span>
       </div>
 
       {deload.triggered && !deloadDismissed && (

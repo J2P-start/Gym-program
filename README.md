@@ -1,14 +1,13 @@
 # BJJ Gym Tracker
 
-A mobile-first React web app for two users to track a shared 3-day-per-week gym programme designed to supplement BJJ training. Each user has their own profile, 1RM records, session logs, and progress charts — all stored locally in the browser.
+A mobile-first React web app for tracking a 3-day-per-week gym programme designed to supplement BJJ training. 1RM records, session logs, and progress charts are all stored locally in the browser.
 
 ---
 
 ## Features
 
-- **Two-user profiles** — simple name-based switching, no passwords
 - **Fixed weekly programme** — Push & Legs, Pull & Posterior Chain, Athletic & Power
-- **Auto-calculated working weights** — derived from each user's individual 1RMs using the Epley formula
+- **Auto-calculated working weights** — derived from your 1RMs using the Epley formula
 - **Passive 1RM estimation** — no dedicated testing week; 1RMs update automatically from logged sets
 - **Session logging** — log weight and reps per set, with a built-in rest timer
 - **Fatigue tracking** — rate each session 1–5 at the end

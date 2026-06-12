@@ -32,7 +32,7 @@ src/
 │   ├── Progress.jsx        # Charts and session history log
 │   ├── Settings.jsx        # Manual 1RM management
 │   ├── Recovery.jsx        # Recovery day checklist
-│   └── ProfileSelector.jsx # Multi-user profile selection
+│   └── ProfileSelector.jsx # First-run name setup (single athlete)
 ├── data/
 │   └── workout.js          # All exercise definitions and session structure
 ├── utils/
@@ -49,7 +49,7 @@ All keys are namespaced by username:
 
 | Key | Value |
 |-----|-------|
-| `bjj_users` | `string[]` — list of user names |
+| `bjj_users` | `string[]` — the first entry is the active (only) athlete; extra entries are legacy |
 | `bjj_1rm_<user>` | `{ [exerciseName]: number }` — estimated 1RMs in kg |
 | `bjj_log_<user>` | `SessionLog[]` — full workout history |
 | `bjj_block_<user>` | `{ week, startDate, lastDeloadDate }` — block progression |

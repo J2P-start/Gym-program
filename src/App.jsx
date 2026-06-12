@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import ProfileSelector from './components/ProfileSelector';
+import { getUsers } from './utils/storage';
 import Home from './components/Home';
 import SessionScreen from './components/SessionScreen';
 import Progress from './components/Progress';
@@ -7,7 +8,7 @@ import Settings from './components/Settings';
 import Recovery from './components/Recovery';
 
 export default function App() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => getUsers()[0] ?? null);
   const [tab, setTab] = useState('home');
   const [session, setSession] = useState(null); // { index, isDeload }
   const [deloadDismissed, setDeloadDismissed] = useState(false);
@@ -40,7 +41,6 @@ export default function App() {
             lastFinished={lastFinished}
             onDismissDeload={() => setDeloadDismissed(true)}
             onStartSession={(index) => setSession({ index, isDeload: false })}
-            onSwitchUser={() => setUser(null)}
           />
         )}
         {tab === 'progress' && <Progress user={user} />}
@@ -54,7 +54,6 @@ export default function App() {
           <Settings
             user={user}
             onUserChange={(name) => setUser(name)}
-            onSwitchUser={() => setUser(null)}
           />
         )}
       </main>
