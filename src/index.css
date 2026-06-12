@@ -450,39 +450,7 @@ html, body, #root {
 }
 
 .set-done { opacity: 0.6; }
-
-.rest-timer {
-  margin-top: 12px;
-  display: flex;
-  align-items: center;
-  background: rgba(228, 220, 245, 0.1);
-  border: 1px solid rgba(228, 220, 245, 0.25);
-  border-radius: var(--pill);
-  overflow: hidden;
-}
-.rest-timer.running { background: rgba(228, 220, 245, 0.18); }
-.rest-timer-main {
-  flex: 1;
-  padding: 10px;
-  background: none;
-  border: none;
-  color: var(--lavender);
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  text-align: center;
-}
-.rest-timer-reset {
-  padding: 10px 16px;
-  background: none;
-  border: none;
-  border-left: 1px solid rgba(228, 220, 245, 0.25);
-  color: var(--lavender);
-  font-size: 16px;
-  cursor: pointer;
-  opacity: 0.7;
-}
-.rest-timer-reset:active { opacity: 1; }
+.set-done .btn-set-done { opacity: 1; }
 
 .finish-btn { margin-top: 24px; }
 

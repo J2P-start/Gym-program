@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { SESSIONS, TRACKED_LIFTS } from '../data/workout';
 import { get1RMs, set1RM, addLog, getBlock, setBlock, getLastSession, storageAvailable } from '../utils/storage';
 import { bestEstimated1RM } from '../utils/oneRM';
@@ -41,7 +41,7 @@ function calcWeight(exercise, oneRMs, isDeload, week) {
   return blockWeight(rm, exercise.percentRange, week, isDeload);
 }
 
-function SetRow({ setNum, exercise, oneRMs, isDeload, week, prevWeight, onComplete }) {
+function SetRow({ setNum, exercise, oneRMs, isDeload, week, prevWeight, onChange }) {
   const suggested = calcWeight(exercise, oneRMs, isDeload, week);
   const [weight, setWeight] = useState(suggested ?? prevWeight ?? '');
   const [reps, setReps] = useState(exercise.reps ?? '');
@@ -51,9 +51,14 @@ function SetRow({ setNum, exercise, oneRMs, isDeload, week, prevWeight, onComple
     if (suggested !== null) setWeight(suggested);
   }, [suggested]);
 
-  function handleComplete() {
-    setDone(true);
-    onComplete({ setNumber: setNum, actualWeight: parseFloat(weight) || 0, reps: parseInt(reps) || 0, completed: true });
+  function toggleDone() {
+    if (done) {
+      setDone(false);
+      onChange(setNum, null);
+    } else {
+      setDone(true);
+      onChange(setNum, { setNumber: setNum, actualWeight: parseFloat(weight) || 0, reps: parseInt(reps) || 0, completed: true });
+    }
   }
 
   return (
@@ -75,66 +80,29 @@ function SetRow({ setNum, exercise, oneRMs, isDeload, week, prevWeight, onComple
         onChange={(e) => setReps(e.target.value)}
         disabled={done}
       />
-      <button className={`btn-set-done ${done ? 'checked' : ''}`} onClick={handleComplete} disabled={done}>
+      <button className={`btn-set-done ${done ? 'checked' : ''}`} onClick={toggleDone}>
         {done ? '✓' : 'Done'}
       </button>
     </div>
   );
 }
 
-function RestTimer({ seconds, onDone }) {
-  const [remaining, setRemaining] = useState(seconds);
-  const [running, setRunning] = useState(false);
-  const ref = useRef(null);
-  const onDoneRef = useRef(onDone);
-  useEffect(() => { onDoneRef.current = onDone; });
-
-  useEffect(() => {
-    if (running && remaining > 0) {
-      ref.current = setInterval(() => setRemaining((r) => r - 1), 1000);
-    } else if (remaining === 0) {
-      clearInterval(ref.current);
-      setRunning(false);
-      onDoneRef.current?.();
-    }
-    return () => clearInterval(ref.current);
-  }, [running, remaining]);
-
-  function toggle() {
-    if (remaining === 0) { setRemaining(seconds); setRunning(false); }
-    else setRunning((r) => !r);
-  }
-
-  function reset(e) {
-    e.stopPropagation();
-    clearInterval(ref.current);
-    setRemaining(seconds);
-    setRunning(false);
-  }
-
-  const m = Math.floor(remaining / 60);
-  const s = remaining % 60;
-
-  return (
-    <div className={`rest-timer ${running ? 'running' : ''}`}>
-      <button className="rest-timer-main" onClick={toggle}>
-        {running ? `${m}:${s.toString().padStart(2, '0')}` : remaining === 0 ? 'Rest done' : `Rest ${m}:${s.toString().padStart(2, '0')}`}
-      </button>
-      <button className="rest-timer-reset" onClick={reset}>↺</button>
-    </div>
-  );
-}
-
-function ExerciseCard({ exercise, oneRMs, isDeload, week, prevSets, onSetsComplete }) {
+function ExerciseCard({ exercise, oneRMs, isDeload, week, prevSets, onSetsChange }) {
   const setCount = isDeload ? Math.max(1, exercise.sets - 1) : exercise.sets;
-  const [completedSets, setCompletedSets] = useState([]);
-  const [showTimer, setShowTimer] = useState(false);
+  const [completedSets, setCompletedSets] = useState({});
 
-  function handleSetDone(setData) {
-    const next = [...completedSets, setData];
+  function handleSetChange(setNum, data) {
+    const next = { ...completedSets };
+    if (data) next[setNum] = data;
+    else delete next[setNum];
     setCompletedSets(next);
-    if (exercise.restSeconds > 0) setShowTimer(true);
-    if (next.length === setCount) onSetsComplete(exercise.name, next);
+    // Report the full ordered set list when every set is done, else retract
+    onSetsChange(
+      exercise.name,
+      Object.keys(next).length === setCount
+        ? Array.from({ length: setCount }, (_, i) => next[i + 1])
+        : null
+    );
   }
 
   const suggested = calcWeight(exercise, oneRMs, isDeload, week);
@@ -196,13 +164,10 @@ function ExerciseCard({ exercise, oneRMs, isDeload, week, prevSets, onSetsComple
             isDeload={isDeload}
             week={week}
             prevWeight={prevSets?.[i]?.actualWeight ?? null}
-            onComplete={handleSetDone}
+            onChange={handleSetChange}
           />
         ))}
       </div>
-      {showTimer && exercise.restSeconds > 0 && (
-        <RestTimer seconds={exercise.restSeconds} onDone={() => setShowTimer(false)} />
-      )}
     </div>
   );
 }
@@ -222,20 +187,32 @@ export default function SessionScreen({ user, sessionIndex, isDeload, onFinish, 
     return Object.fromEntries(lastLog.exercises.map((e) => [e.name, e.sets]));
   }, [user, session]);
 
-  function handleSetsComplete(name, sets) {
-    setExerciseSets((prev) => ({ ...prev, [name]: sets }));
+  function handleSetsChange(name, setsOrNull) {
+    setExerciseSets((prev) => {
+      const next = { ...prev };
+      if (setsOrNull) next[name] = setsOrNull;
+      else delete next[name];
+      return next;
+    });
+  }
 
-    if (TRACKED_LIFTS.includes(name)) {
+  // 1RM updates happen here, not as sets complete, so un-ticking a set to fix
+  // a typo can never leave a wrong estimate behind.
+  function startFinish() {
+    const summary = {};
+    const updated = { ...oneRMs };
+    for (const [name, sets] of Object.entries(exerciseSets)) {
+      if (!TRACKED_LIFTS.includes(name)) continue;
       const est = bestEstimated1RM(sets.map((s) => ({ weight: s.actualWeight, reps: s.reps })));
-      if (est) {
-        const current = oneRMs[name] ?? 0;
-        if (est > current) {
-          set1RM(user, name, est);
-          setOneRMs((prev) => ({ ...prev, [name]: est }));
-          setEstimatedSummary((prev) => ({ ...prev, [name]: est }));
-        }
+      if (est && est > (updated[name] ?? 0)) {
+        set1RM(user, name, est);
+        updated[name] = est;
+        summary[name] = est;
       }
     }
+    setOneRMs(updated);
+    setEstimatedSummary(summary);
+    setShowFatigue(true);
   }
 
   const allDone = session.exercises.every((e) => exerciseSets[e.name]);
@@ -324,13 +301,13 @@ export default function SessionScreen({ user, sessionIndex, isDeload, onFinish, 
             isDeload={isDeload}
             week={blockWeek}
             prevSets={prevExercises[ex.name] ?? null}
-            onSetsComplete={handleSetsComplete}
+            onSetsChange={handleSetsChange}
           />
         ))}
       </div>
 
       {allDone && (
-        <button className="btn-primary finish-btn" onClick={() => setShowFatigue(true)}>
+        <button className="btn-primary finish-btn" onClick={startFinish}>
           Finish session
         </button>
       )}
