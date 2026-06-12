@@ -3,6 +3,7 @@ import { SESSIONS, TRACKED_LIFTS } from '../data/workout';
 import { get1RMs, set1RM, addLog, getBlock, setBlock, getLastSession, storageAvailable } from '../utils/storage';
 import { bestEstimated1RM } from '../utils/oneRM';
 import { blockPercent, blockWeight, trainingWeek } from '../utils/progression';
+import { localDateStr } from '../utils/dates';
 
 function calcWeight(exercise, oneRMs, isDeload, week) {
   if (exercise.loadType !== 'percent') return null;
@@ -211,7 +212,7 @@ export default function SessionScreen({ user, sessionIndex, isDeload, onFinish, 
     const block = getBlock(user);
     const entry = {
       user,
-      date: new Date().toISOString().slice(0, 10),
+      date: localDateStr(),
       session: `${session.day} — ${session.name}`,
       fatigueRating: rating,
       blockWeek,
@@ -229,7 +230,7 @@ export default function SessionScreen({ user, sessionIndex, isDeload, onFinish, 
     }
 
     if (isDeload) {
-      setBlock(user, { week: 1, startDate: new Date().toISOString().slice(0, 10), lastDeloadDate: new Date().toISOString().slice(0, 10) });
+      setBlock(user, { week: 1, startDate: localDateStr(), lastDeloadDate: localDateStr() });
     } else {
       setBlock(user, { ...block, week: block.week + 1 });
     }

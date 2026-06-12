@@ -1,8 +1,9 @@
 import { useState, useMemo } from 'react';
 import { TRACKED_LIFTS } from '../data/workout';
 import { get1RMs, setAll1RMs, getBlock, setBlock, getLogs, renameUser, getUsers } from '../utils/storage';
-import { epley } from '../utils/oneRM';
+import { epley, bestEstimated1RM } from '../utils/oneRM';
 import { trainingWeek } from '../utils/progression';
+import { localDateStr } from '../utils/dates';
 
 function RMDelta({ baseline, current }) {
   if (!baseline || !current) return null;
@@ -23,7 +24,10 @@ export default function Settings({ user, onUserChange, onSwitchUser }) {
   const [newName, setNewName] = useState(user);
   const [saved, setSaved] = useState(false);
 
-  // Earliest logged 1RM estimate per lift — the baseline each delta is measured from
+  // Baseline 1RM per lift, estimated from the raw sets of the earliest session
+  // that logged the lift. (The stored estimatedOneRM field can't be used here:
+  // it's only written when a session sets a new PR, so it would measure
+  // progress from the first PR instead of the first session.)
   const baselines = useMemo(() => {
     const logs = getLogs(user)
       .filter((l) => !l.isDeload)
@@ -31,7 +35,9 @@ export default function Settings({ user, onUserChange, onSwitchUser }) {
     const map = {};
     for (const log of logs) {
       for (const e of log.exercises ?? []) {
-        if (e.estimatedOneRM != null && map[e.name] === undefined) map[e.name] = e.estimatedOneRM;
+        if (map[e.name] !== undefined || !e.sets?.length) continue;
+        const est = bestEstimated1RM(e.sets.map((s) => ({ weight: s.actualWeight, reps: s.reps })));
+        if (est != null) map[e.name] = est;
       }
     }
     return map;
@@ -75,7 +81,7 @@ export default function Settings({ user, onUserChange, onSwitchUser }) {
 
   function resetBlock() {
     if (!window.confirm('Reset block counter to week 1?')) return;
-    setBlock(user, { ...getBlock(user), week: 1, startDate: new Date().toISOString().slice(0, 10) });
+    setBlock(user, { ...getBlock(user), week: 1, startDate: localDateStr() });
     alert('Block reset to week 1');
   }
 

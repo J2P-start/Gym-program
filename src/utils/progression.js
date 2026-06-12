@@ -1,11 +1,8 @@
 import { round2_5 } from './oneRM';
 import { getLogs, getBlock } from './storage';
+import { localDateStr } from './dates';
 
 export const DELOAD_PERCENT = 60;
-
-function localDateStr(d = new Date()) {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
 
 /** Monday of the week containing a YYYY-MM-DD date, as YYYY-MM-DD */
 export function weekStart(dateStr) {

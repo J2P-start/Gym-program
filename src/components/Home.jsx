@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { WEEK_SCHEDULE, SESSIONS } from '../data/workout';
 import { checkDeload } from '../utils/deload';
 import { trainingWeek } from '../utils/progression';
+import { localDateStr } from '../utils/dates';
 
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const WEEKS_TO_SHOW = 4;
@@ -20,7 +21,7 @@ function getWeekDays(offsetWeeks) {
 
 export default function Home({ user, onStartSession, onDismissDeload, deloadDismissed, onSwitchUser, lastFinished }) {
   const todayName = DAY_NAMES[new Date().getDay()];
-  const todayDateStr = new Date().toISOString().slice(0, 10);
+  const todayDateStr = localDateStr();
   const week = useMemo(() => trainingWeek(user), [user, lastFinished]);
   const deload = useMemo(() => checkDeload(user), [user, lastFinished]);
 
@@ -64,7 +65,7 @@ export default function Home({ user, onStartSession, onDismissDeload, deloadDism
             <div className="week-strip">
               {days.map((date, di) => {
                 const schedule = WEEK_SCHEDULE[di];
-                const dateStr = date.toISOString().slice(0, 10);
+                const dateStr = localDateStr(date);
                 const isToday = dateStr === todayDateStr;
                 const isSelected = di === selectedDayIndex;
                 return (

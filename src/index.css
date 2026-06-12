@@ -300,7 +300,7 @@ html, body, #root {
 .today-card .btn-primary:not(:disabled):active { background: #2e2e33; }
 
 .rest-card h2 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
-.rest-card p { color: var(--text2); }
+.rest-card p { color: rgba(23, 23, 26, 0.65); }
 
 /* ── Session screen ───────────────────────────────────── */
 .session-screen { padding-bottom: 24px; }
