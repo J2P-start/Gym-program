@@ -1,10 +1,42 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { SESSIONS, TRACKED_LIFTS } from '../data/workout';
 import { get1RMs, set1RM, addLog, getBlock, setBlock, getLastSession, storageAvailable } from '../utils/storage';
 import { bestEstimated1RM } from '../utils/oneRM';
 import { blockPercent, blockWeight, trainingWeek } from '../utils/progression';
 import { localDateStr } from '../utils/dates';
 import { warmupSets } from '../utils/warmup';
+
+/**
+ * iOS-style back gesture: a touch that starts at the left screen edge and
+ * swipes right triggers onBack. Edge-start + strongly-horizontal requirements
+ * keep it from firing on normal scrolling or input interaction.
+ */
+function useSwipeBack(onBack) {
+  const onBackRef = useRef(onBack);
+  useEffect(() => { onBackRef.current = onBack; });
+
+  useEffect(() => {
+    let start = null;
+    function onTouchStart(e) {
+      const t = e.touches[0];
+      start = t.clientX <= 40 ? { x: t.clientX, y: t.clientY } : null;
+    }
+    function onTouchEnd(e) {
+      if (!start) return;
+      const t = e.changedTouches[0];
+      const dx = t.clientX - start.x;
+      const dy = Math.abs(t.clientY - start.y);
+      start = null;
+      if (dx > 70 && dy < 60) onBackRef.current();
+    }
+    window.addEventListener('touchstart', onTouchStart);
+    window.addEventListener('touchend', onTouchEnd);
+    return () => {
+      window.removeEventListener('touchstart', onTouchStart);
+      window.removeEventListener('touchend', onTouchEnd);
+    };
+  }, []);
+}
 
 function WarmupChecklist({ items }) {
   const [done, setDone] = useState(() => items.map(() => false));
@@ -237,6 +269,8 @@ export default function SessionScreen({ user, sessionIndex, isDeload, onFinish, 
     if (Object.keys(exerciseSets).length > 0 && !window.confirm('Go back? Your progress for this session will be lost.')) return;
     onBack();
   }
+
+  useSwipeBack(handleBack);
 
   function handleFatigue(rating) {
     const block = getBlock(user);
