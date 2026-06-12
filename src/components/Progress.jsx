@@ -10,7 +10,7 @@ import { TRACKED_LIFTS } from '../data/workout';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
-const COLORS = ['#4ade80', '#60a5fa', '#f59e0b', '#f87171', '#a78bfa', '#34d399'];
+const COLORS = ['#d7e9f7', '#cdbcf0', '#f5d8a8', '#f0a8b8', '#9ec8f0', '#a8e8cf'];
 
 function LiftChart({ lift, logs, color }) {
   const points = useMemo(() => {
@@ -73,10 +73,10 @@ function LiftChart({ lift, logs, color }) {
 
   const options = {
     responsive: true,
-    plugins: { legend: { labels: { color: '#e5e7eb', font: { size: 11 } } }, tooltip: { mode: 'index' } },
+    plugins: { legend: { labels: { color: '#f4f4f6', font: { size: 11, family: 'Poppins' } } }, tooltip: { mode: 'index' } },
     scales: {
-      x: { ticks: { color: '#9ca3af', maxTicksLimit: 6 }, grid: { color: '#374151' } },
-      y: { ticks: { color: '#9ca3af' }, grid: { color: '#374151' } },
+      x: { ticks: { color: '#9a9aa2', maxTicksLimit: 6 }, grid: { color: '#2e2e33' } },
+      y: { ticks: { color: '#9a9aa2' }, grid: { color: '#2e2e33' } },
     },
   };
 

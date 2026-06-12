@@ -115,9 +115,12 @@ Tests live alongside source files as `*.test.js`. Currently: `src/utils/deload.t
 
 ## CSS Conventions
 
-All styles in `src/index.css`. CSS custom properties defined on `:root`:
-- `--bg`, `--bg2`, `--bg3` — background layers
+All styles in `src/index.css`. Dark near-black theme with pale "light surface" accents (dribbble-style): accent elements are light cards/pills with dark text (`--on-accent`), not coloured text on dark. Font is Poppins (Google Fonts link in `index.html`). CSS custom properties defined on `:root`:
+- `--bg`, `--bg2`, `--bg3` — background layers (near-black → panel → input)
 - `--text`, `--text2` — primary / muted text
-- `--accent`, `--accent2` — green highlights
+- `--accent`, `--accent2` — pale ice-blue highlight surface (+ pressed state)
+- `--lavender` — pale lavender secondary surface
+- `--on-accent` — dark text used on the light accent surfaces
 - `--danger` — red
 - `--warn` — amber
+- `--radius`, `--radius-sm`, `--pill` — 24px cards, 14px inputs, fully-rounded pills
