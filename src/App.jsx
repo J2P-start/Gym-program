@@ -9,7 +9,7 @@ import Recovery from './components/Recovery';
 export default function App() {
   const [user, setUser] = useState(null);
   const [tab, setTab] = useState('home');
-  const [session, setSession] = useState(null); // { index, isDeload }
+  const [session, setSession] = useState(null); // { id, isDeload }
   const [deloadDismissed, setDeloadDismissed] = useState(false);
   const [lastFinished, setLastFinished] = useState(0);
   const [recoveryChecked, setRecoveryChecked] = useState({});
@@ -22,7 +22,7 @@ export default function App() {
     return (
       <SessionScreen
         user={user}
-        sessionIndex={session.index}
+        sessionId={session.id}
         isDeload={session.isDeload}
         onBack={() => setSession(null)}
         onFinish={() => { setSession(null); setTab('home'); setLastFinished(Date.now()); }}
@@ -39,7 +39,7 @@ export default function App() {
             deloadDismissed={deloadDismissed}
             lastFinished={lastFinished}
             onDismissDeload={() => setDeloadDismissed(true)}
-            onStartSession={(index) => setSession({ index, isDeload: false })}
+            onStartSession={(id) => setSession({ id, isDeload: false })}
             onSwitchUser={() => setUser(null)}
           />
         )}

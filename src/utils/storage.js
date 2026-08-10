@@ -1,7 +1,10 @@
+import { DEFAULT_HYROX } from '../data/hyrox';
+
 const KEY_USERS = 'bjj_users';
 const key1RM = (u) => `bjj_1rm_${u}`;
 const keyLog = (u) => `bjj_log_${u}`;
 const keyBlock = (u) => `bjj_block_${u}`;
+const keyHyrox = (u) => `bjj_hyrox_${u}`;
 
 function get(key, fallback) {
   try {
@@ -64,16 +67,25 @@ export function getBlock(username) {
 }
 export function setBlock(username, data) { set(keyBlock(username), data); }
 
+/** Hyrox plan config: race date, plan start, and an optional manual week. */
+export function getHyrox(username) {
+  return { ...DEFAULT_HYROX, ...get(keyHyrox(username), {}) };
+}
+export function setHyrox(username, data) { set(keyHyrox(username), { ...getHyrox(username), ...data }); }
+
 export function renameUser(oldName, newName) {
   const rms = get1RMs(oldName);
   const logs = getLogs(oldName);
   const block = getBlock(oldName);
+  const hyrox = getHyrox(oldName);
   setAll1RMs(newName, rms);
   set(keyLog(newName), logs);
   setBlock(newName, block);
+  set(keyHyrox(newName), hyrox);
   localStorage.removeItem(key1RM(oldName));
   localStorage.removeItem(keyLog(oldName));
   localStorage.removeItem(keyBlock(oldName));
+  localStorage.removeItem(keyHyrox(oldName));
   const users = getUsers().map((u) => (u === oldName ? newName : u));
   setUsers(users);
 }

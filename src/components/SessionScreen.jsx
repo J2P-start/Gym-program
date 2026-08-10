@@ -1,7 +1,23 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { SESSIONS, TRACKED_LIFTS } from '../data/workout';
-import { get1RMs, set1RM, addLog, getBlock, setBlock, getLastSession, storageAvailable } from '../utils/storage';
+import { TRACKED_LIFTS } from '../data/workout';
+import { getSessionById } from '../data/sessions';
+import { get1RMs, set1RM, addLog, getBlock, setBlock, getLastSession } from '../utils/storage';
 import { workingWeight, bestEstimated1RM } from '../utils/oneRM';
+import { parseTime, formatTime } from '../utils/time';
+
+// Which columns the set logger shows. Exercises without a `track` field get the
+// original weight + reps pair, so every pre-existing exercise is unchanged.
+const DEFAULT_TRACK = ['weight', 'reps'];
+
+const FIELDS = {
+  weight:   { label: 'kg',   placeholder: 'kg',    inputType: 'number' },
+  reps:     { label: 'reps', placeholder: 'reps',  inputType: 'number' },
+  distance: { label: 'm',    placeholder: 'm',     inputType: 'number' },
+  time:     { label: 'time', placeholder: 'mm:ss', inputType: 'text' },
+};
+
+const trackOf = (exercise) => exercise.track ?? DEFAULT_TRACK;
+const keyOf = (exercise) => exercise.id ?? exercise.name;
 
 function calcWeight(exercise, oneRMs, isDeload) {
   if (exercise.loadType !== 'percent') return null;
@@ -11,40 +27,57 @@ function calcWeight(exercise, oneRMs, isDeload) {
   return workingWeight(rm, pct);
 }
 
-function SetRow({ setNum, exercise, oneRMs, isDeload, prevWeight, onComplete }) {
+function SetRow({ setNum, exercise, oneRMs, isDeload, prevSet, onComplete }) {
+  const track = trackOf(exercise);
   const suggested = calcWeight(exercise, oneRMs, isDeload);
-  const [weight, setWeight] = useState(suggested ?? prevWeight ?? '');
-  const [reps, setReps] = useState(exercise.reps ?? '');
+  const [values, setValues] = useState(() => ({
+    weight: suggested ?? prevSet?.actualWeight ?? '',
+    reps: exercise.reps ?? '',
+    distance: exercise.defaults?.distance ?? '',
+    time: '',
+  }));
   const [done, setDone] = useState(false);
 
   useEffect(() => {
-    if (suggested !== null) setWeight(suggested);
+    if (suggested !== null) setValues((v) => ({ ...v, weight: suggested }));
   }, [suggested]);
+
+  function update(field, value) {
+    setValues((v) => ({ ...v, [field]: value }));
+  }
 
   function handleComplete() {
     setDone(true);
-    onComplete({ setNumber: setNum, actualWeight: parseFloat(weight) || 0, reps: parseInt(reps) || 0, completed: true });
+    // actualWeight and reps are always written, even for runs and erg pieces,
+    // so existing readers (progress charts, 1RM estimation, deload) keep
+    // working against the same set shape they always have.
+    const entry = {
+      setNumber: setNum,
+      actualWeight: exercise.loadType === 'fixed'
+        ? (exercise.fixedWeight ?? 0)
+        : (parseFloat(values.weight) || 0),
+      reps: parseInt(values.reps) || 0,
+      completed: true,
+    };
+    if (track.includes('distance')) entry.distanceM = parseFloat(values.distance) || 0;
+    if (track.includes('time')) entry.timeSec = parseTime(values.time);
+    onComplete(entry);
   }
 
   return (
     <div className={`set-row ${done ? 'set-done' : ''}`}>
       <span className="set-num">{setNum}</span>
-      <input
-        type="number"
-        className="set-input"
-        placeholder="kg"
-        value={weight}
-        onChange={(e) => setWeight(e.target.value)}
-        disabled={done}
-      />
-      <input
-        type="number"
-        className="set-input"
-        placeholder="reps"
-        value={reps}
-        onChange={(e) => setReps(e.target.value)}
-        disabled={done}
-      />
+      {track.map((field) => (
+        <input
+          key={field}
+          type={FIELDS[field].inputType}
+          className="set-input"
+          placeholder={FIELDS[field].placeholder}
+          value={values[field]}
+          onChange={(e) => update(field, e.target.value)}
+          disabled={done}
+        />
+      ))}
       <button className={`btn-set-done ${done ? 'checked' : ''}`} onClick={handleComplete} disabled={done}>
         {done ? '✓' : 'Done'}
       </button>
@@ -95,8 +128,9 @@ function RestTimer({ seconds, onDone }) {
   );
 }
 
-function ExerciseCard({ exercise, oneRMs, isDeload, prevSets, onSetsComplete }) {
+function ExerciseCard({ exercise, oneRMs, isDeload, prevSets, onSetsUpdate }) {
   const setCount = isDeload ? Math.max(1, exercise.sets - 1) : exercise.sets;
+  const track = trackOf(exercise);
   const [completedSets, setCompletedSets] = useState([]);
   const [showTimer, setShowTimer] = useState(false);
 
@@ -104,7 +138,7 @@ function ExerciseCard({ exercise, oneRMs, isDeload, prevSets, onSetsComplete }) 
     const next = [...completedSets, setData];
     setCompletedSets(next);
     if (exercise.restSeconds > 0) setShowTimer(true);
-    if (next.length === setCount) onSetsComplete(exercise.name, next);
+    onSetsUpdate(exercise, next, next.length === setCount);
   }
 
   const suggested = calcWeight(exercise, oneRMs, isDeload);
@@ -115,11 +149,19 @@ function ExerciseCard({ exercise, oneRMs, isDeload, prevSets, onSetsComplete }) 
     }
     if (exercise.loadType === 'bodyweight') return 'Bodyweight';
     if (exercise.loadType === 'added') return exercise.addedNote;
+    if (exercise.loadType === 'fixed') return exercise.fixedLabel;
     return exercise.note ?? '';
   })();
 
   const prevHint = (() => {
-    if (exercise.loadType === 'percent' || !prevSets?.length) return null;
+    if (exercise.loadType === 'percent' || exercise.loadType === 'fixed' || !prevSets?.length) return null;
+    if (track.includes('time')) {
+      const times = prevSets.map((s) => s.timeSec).filter((t) => t > 0);
+      if (times.length) {
+        const shown = times.slice(0, 4).map(formatTime).join(', ');
+        return `Last: ${shown}${times.length > 4 ? ' …' : ''}`;
+      }
+    }
     const weights = prevSets.map((s) => s.actualWeight).filter((w) => w > 0);
     if (!weights.length) return null;
     const min = Math.min(...weights);
@@ -131,6 +173,8 @@ function ExerciseCard({ exercise, oneRMs, isDeload, prevSets, onSetsComplete }) 
     ? `${Math.floor(exercise.restSeconds / 60)}:${String(exercise.restSeconds % 60).padStart(2, '0')} rest`
     : null;
 
+  const gridStyle = { gridTemplateColumns: `20px ${track.map(() => '1fr').join(' ')} 52px` };
+
   return (
     <div className="exercise-card">
       <div className="exercise-header">
@@ -141,12 +185,19 @@ function ExerciseCard({ exercise, oneRMs, isDeload, prevSets, onSetsComplete }) 
         <span className="load-label">{loadLabel}</span>
         {restLabel && <span className="rest-label">{restLabel}</span>}
       </div>
+      {exercise.raceSpec && <span className="race-spec">Race: {exercise.raceSpec}</span>}
+      {/* Skipped when the effort guidance is already the load label, which is
+          the case for exercises whose only "load" is a pacing instruction. */}
+      {exercise.effort && exercise.effort !== loadLabel && (
+        <span className="effort-hint">{exercise.effort}</span>
+      )}
       {prevHint && <span className="prev-weight-hint">{prevHint}</span>}
-      <div className="sets-list">
+      <div className="sets-list" style={gridStyle}>
         <div className="set-header-row">
           <span className="set-num" />
-          <span className="set-col-label">kg</span>
-          <span className="set-col-label">reps</span>
+          {track.map((field) => (
+            <span key={field} className="set-col-label">{FIELDS[field].label}</span>
+          ))}
           <span className="set-done-spacer" />
         </div>
         {Array.from({ length: setCount }, (_, i) => (
@@ -156,7 +207,7 @@ function ExerciseCard({ exercise, oneRMs, isDeload, prevSets, onSetsComplete }) 
             exercise={exercise}
             oneRMs={oneRMs}
             isDeload={isDeload}
-            prevWeight={prevSets?.[i]?.actualWeight ?? null}
+            prevSet={prevSets?.[i] ?? null}
             onComplete={handleSetDone}
           />
         ))}
@@ -168,40 +219,62 @@ function ExerciseCard({ exercise, oneRMs, isDeload, prevSets, onSetsComplete }) 
   );
 }
 
-export default function SessionScreen({ user, sessionIndex, isDeload, onFinish, onBack }) {
-  const session = SESSIONS[sessionIndex];
+export default function SessionScreen({ user, sessionId, isDeload, onFinish, onBack }) {
+  const session = getSessionById(sessionId);
   const [oneRMs, setOneRMs] = useState(() => get1RMs(user));
   const [exerciseSets, setExerciseSets] = useState({});
+  const [completedKeys, setCompletedKeys] = useState([]);
   const [showFatigue, setShowFatigue] = useState(false);
   const [estimatedSummary, setEstimatedSummary] = useState({});
 
   const prevExercises = useMemo(() => {
+    if (!session) return {};
     const sessionName = `${session.day} — ${session.name}`;
     const lastLog = getLastSession(user, sessionName);
     if (!lastLog) return {};
     return Object.fromEntries(lastLog.exercises.map((e) => [e.name, e.sets]));
   }, [user, session]);
 
-  function handleSetsComplete(name, sets) {
-    setExerciseSets((prev) => ({ ...prev, [name]: sets }));
+  if (!session) {
+    return (
+      <div className="session-screen">
+        <div className="session-header">
+          <button className="btn-back" onClick={onBack}>←</button>
+          <div><h2>Session not found</h2></div>
+        </div>
+      </div>
+    );
+  }
 
-    if (TRACKED_LIFTS.includes(name)) {
+  function handleSetsUpdate(exercise, sets, isComplete) {
+    const key = keyOf(exercise);
+    // Partial sets are kept too, so finishing early still logs what you did.
+    setExerciseSets((prev) => ({ ...prev, [key]: sets }));
+    if (!isComplete) return;
+
+    setCompletedKeys((prev) => (prev.includes(key) ? prev : [...prev, key]));
+
+    if (TRACKED_LIFTS.includes(exercise.name)) {
       const est = bestEstimated1RM(sets.map((s) => ({ weight: s.actualWeight, reps: s.reps })));
       if (est) {
-        const current = oneRMs[name] ?? 0;
+        const current = oneRMs[exercise.name] ?? 0;
         if (est > current) {
-          set1RM(user, name, est);
-          setOneRMs((prev) => ({ ...prev, [name]: est }));
-          setEstimatedSummary((prev) => ({ ...prev, [name]: est }));
+          set1RM(user, exercise.name, est);
+          setOneRMs((prev) => ({ ...prev, [exercise.name]: est }));
+          setEstimatedSummary((prev) => ({ ...prev, [exercise.name]: est }));
         }
       }
     }
   }
 
-  const allDone = session.exercises.every((e) => exerciseSets[e.name]);
+  const allDone = session.exercises.every((e) => completedKeys.includes(keyOf(e)));
+  // Counts exercises with any sets logged, not just fully completed ones —
+  // a half-finished run block still gets written to the log.
+  const loggedCount = session.exercises.filter((e) => (exerciseSets[keyOf(e)] ?? []).length > 0).length;
+  const anyLogged = loggedCount > 0;
 
   function handleBack() {
-    if (Object.keys(exerciseSets).length > 0 && !window.confirm('Go back? Your progress for this session will be lost.')) return;
+    if (anyLogged && !window.confirm('Go back? Your progress for this session will be lost.')) return;
     onBack();
   }
 
@@ -217,7 +290,7 @@ export default function SessionScreen({ user, sessionIndex, isDeload, onFinish, 
       exercises: session.exercises.map((e) => ({
         name: e.name,
         estimatedOneRM: estimatedSummary[e.name] ?? null,
-        sets: (exerciseSets[e.name] ?? []).map((s, i) => ({ setNumber: i + 1, ...s })),
+        sets: (exerciseSets[keyOf(e)] ?? []).map((s, i) => ({ setNumber: i + 1, ...s })),
       })),
     };
     const saved = addLog(user, entry);
@@ -277,12 +350,12 @@ export default function SessionScreen({ user, sessionIndex, isDeload, onFinish, 
       <div className="exercises">
         {session.exercises.map((ex) => (
           <ExerciseCard
-            key={ex.name}
+            key={keyOf(ex)}
             exercise={ex}
             oneRMs={oneRMs}
             isDeload={isDeload}
             prevSets={prevExercises[ex.name] ?? null}
-            onSetsComplete={handleSetsComplete}
+            onSetsUpdate={handleSetsUpdate}
           />
         ))}
       </div>
@@ -290,6 +363,11 @@ export default function SessionScreen({ user, sessionIndex, isDeload, onFinish, 
       {allDone && (
         <button className="btn-primary finish-btn" onClick={() => setShowFatigue(true)}>
           Finish session
+        </button>
+      )}
+      {!allDone && anyLogged && (
+        <button className="btn-secondary finish-early-btn" onClick={() => setShowFatigue(true)}>
+          Finish early — log {loggedCount} of {session.exercises.length} exercises
         </button>
       )}
     </div>

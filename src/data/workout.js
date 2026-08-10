@@ -13,6 +13,7 @@ export const TRACKED_LIFTS = [
 
 export const SESSIONS = [
   {
+    id: 'bjj-mon-push-legs',
     day: 'Monday',
     name: 'Push & Legs',
     duration: '~60 min',
@@ -27,6 +28,7 @@ export const SESSIONS = [
     ],
   },
   {
+    id: 'bjj-wed-pull-posterior',
     day: 'Wednesday',
     name: 'Pull & Posterior Chain',
     duration: '~65 min',
@@ -41,6 +43,7 @@ export const SESSIONS = [
     ],
   },
   {
+    id: 'bjj-fri-athletic-power',
     day: 'Friday',
     name: 'Athletic & Power',
     duration: '~55 min',
@@ -71,6 +74,8 @@ export const RECOVERY_DAY = {
   nutrition: 'High protein, carbs to replenish glycogen, electrolytes, magnesium glycinate in the evening.',
 };
 
+// The original fixed BJJ weekly template. Superseded by the phase-driven Hyrox
+// templates in hyrox.js — kept here as the record of the pre-Hyrox programme.
 export const WEEK_SCHEDULE = [
   { day: 'Monday',    type: 'gym',      sessionIndex: 0 },
   { day: 'Tuesday',   type: 'bjj',      sessionIndex: null },

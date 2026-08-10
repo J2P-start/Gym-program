@@ -1,13 +1,17 @@
 # BJJ Gym Tracker
 
-A mobile-first React web app for two users to track a shared 3-day-per-week gym programme designed to supplement BJJ training. Each user has their own profile, 1RM records, session logs, and progress charts — all stored locally in the browser.
+A mobile-first React web app for two users to track training. Each user has their own profile, 1RM records, session logs, and progress charts — all stored locally in the browser.
+
+It currently runs a **17-week Hyrox Doubles plan** (Base → Build → Peak → Taper) built on top of the original BJJ strength programme: the same lifts, the same 1RM tracking and the same charts, with the weekly schedule now driven by whichever phase you're in.
 
 ---
 
 ## Features
 
 - **Two-user profiles** — simple name-based switching, no passwords
-- **Fixed weekly programme** — Push & Legs, Pull & Posterior Chain, Athletic & Power
+- **Phase-driven weekly schedule** — the 17-week Hyrox plan; each week's template comes from its phase
+- **Hyrox station work** — all 8 race stations at Men's Open Doubles specs, with distance and time logging
+- **Running sessions** — compromised intervals, pure runs and doubles simulations, logged as distance + time
 - **Auto-calculated working weights** — derived from each user's individual 1RMs using the Epley formula
 - **Passive 1RM estimation** — no dedicated testing week; 1RMs update automatically from logged sets
 - **Session logging** — log weight and reps per set, with a built-in rest timer
@@ -18,64 +22,71 @@ A mobile-first React web app for two users to track a shared 3-day-per-week gym 
 
 ---
 
-## Weekly Schedule
+## The 17-Week Plan
 
-| Day | Type | Session |
-|---|---|---|
-| Monday | Gym | Push & Legs |
-| Tuesday | BJJ | — |
-| Wednesday | Gym | Pull & Posterior Chain |
-| Thursday | BJJ | — |
-| Friday | Gym | Athletic & Power |
-| Saturday | BJJ | — |
-| Sunday | Recovery | Sauna + mobility |
+Race day: **Sunday 6 December 2026**. Plan week 1 begins **Monday 10 August 2026**.
 
----
-
-## Workout Plan
-
-### Monday — Push & Legs (~60 min)
-*Low grip fatigue before Tuesday BJJ.*
-
-| Exercise | Sets | Reps | Load |
+| Phase | Weeks | BJJ | Focus |
 |---|---|---|---|
-| Back squat | 4 | 4 | 80–85% 1RM |
-| Romanian deadlift | 3 | 8 | 70% 1RM |
-| Barbell bench press | 4 | 5 | 75–80% 1RM |
-| Landmine press | 3 | 10 each side | Moderate-heavy |
-| Ab wheel rollout | 3 | 10 | Bodyweight |
-| Pallof press | 3 | 12 each side | Light-moderate |
+| **Base** | 1–6 | 3× (Tue/Thu/Sat) | Aerobic engine, strength maintained, station technique learned |
+| **Build** | 7–12 | 3× (Tue/Thu/Sat) | Compromised running, station volume up, doubles pacing |
+| **Peak** | 13–15 | 2× (Tue/Sat) | Doubles simulations, split strategy, weak-point drilling |
+| **Taper** | 16–17 | 1–2×, light | Volume down 40–60%, sharpness up, race week |
 
-### Wednesday — Pull & Posterior Chain (~65 min)
-*Most BJJ-relevant session — grip strength, pulling power, posterior chain.*
+The current week is derived from the calendar, and can be overridden from Settings when life shifts the plan around.
 
-| Exercise | Sets | Reps | Load |
-|---|---|---|---|
-| Trap bar deadlift | 4 | 4 | 80–85% 1RM |
-| Weighted pull-ups | 4 | 5–6 | +10–20 kg (log added weight) |
-| Chest-supported DB row | 3 | 10 each side | Moderate-heavy |
-| Barbell hip thrust | 3 | 8 | 75% 1RM |
-| Gi / towel pull-up | 3 | Max (aim 6–10) | Bodyweight |
-| Dead hang | 3 | 30–45 sec hold | Bodyweight |
+### Pacing philosophy
 
-### Friday — Athletic & Power (~55 min)
-*Explosive and short — don't bury yourself before Saturday BJJ.*
+This plan targets a **comfortable, sustainable race**, not a maximal one. Every run is prescribed at conversational or controlled effort, and "race intensity" throughout means *steady enough to hold for all 8 rounds*. The UI copy follows that deliberately — there is a test in `src/data/hyrox.test.js` that fails if max-effort framing creeps back into session guidance.
 
-| Exercise | Sets | Reps | Load |
-|---|---|---|---|
-| Power clean / hang clean | 4 | 3 | 70% 1RM |
-| Box jump | 3 | 5 | Bodyweight |
-| Farmers carry | 4 | 40 m | Heavy (log weight used) |
-| Single-leg RDL | 3 | 8 each side | Moderate |
-| Battle rope / rowing 500m | 4 | 30 sec on / 30 sec off | Max effort |
-| Dragon flag / L-sit | 3 | Max hold or 5 reps | Bodyweight |
+### Weekly templates
+
+| Day | Base | Build | Peak | Taper (wk 16) |
+|---|---|---|---|---|
+| Mon | Strength — Lower & Hips | Strength — Squat, Hips & Lunge | Strength — Light & Fast | Strength — Short & Light |
+| Tue | BJJ | BJJ | BJJ | BJJ light |
+| Wed | Hyrox technique circuit* | Doubles simulation (partial)† | Doubles simulation (half/full) | Sharpener |
+| Thu | BJJ | BJJ + easy–moderate run | Compromised intervals + weak point | Easy run |
+| Fri | Strength — Pull & Power | Station strength-endurance | Rest / mobility | Rest / mobility |
+| Sat | BJJ | BJJ | BJJ | BJJ light |
+| Sun | Recovery + weekly run‡ | Recovery + Zone 2 | Recovery | Recovery |
+
+\* Weeks 3 and 5 swap in controlled 400 m repeats.
+† Weeks 9 and 12 extend to 7 legs. Station set alternates weekly so all 8 are covered each fortnight.
+‡ Week 1 is a 3 km baseline time trial; thereafter alternating easy and threshold runs.
+
+Race week (week 17) runs technique touches Mon/Tue, a short opener Wed, rest Thu–Sat with an optional shakeout, and the race on Sunday.
+
+### The 8 stations (Men's Open Doubles)
+
+| Station | Race spec |
+|---|---|
+| SkiErg | 1000 m |
+| Sled push | 152 kg, 50 m |
+| Sled pull | 103 kg, 50 m |
+| Burpee broad jumps | 80 m |
+| Row | 1000 m |
+| Farmers carry | 2 × 24 kg, 200 m |
+| Weighted lunge (sandbag substitute) | 20 kg, 100 m |
+| Wall balls | 6 kg to 10 ft, 100 reps shared |
+
+Runs are covered together; station reps and distance are split between partners however you choose.
 
 ### Sunday — Recovery
-Active recovery guide (not a logged session):
+
+Active recovery guide (not a logged session), unchanged:
 - Mobility flow: Hip 90/90, World's greatest stretch, Thoracic rotations, Shoulder CARs, Couch stretch
 - Sauna: 2–3 rounds of 7–10 min, 3–5 min cool-down between (target 80–90°C)
 - Cold exposure (optional): 3–5 min cold shower or plunge post-sauna
 - Nutrition: high protein, carbs to replenish glycogen, electrolytes, magnesium glycinate in the evening
+
+A 10-minute mobility/prehab block (ankle, hip flexor, thoracic) is tagged onto strength days from the Build phase onward, rather than given its own session.
+
+---
+
+## Legacy BJJ Programme
+
+The original fixed Mon/Wed/Fri programme — Push & Legs, Pull & Posterior Chain, Athletic & Power — is no longer on the weekly schedule. Its session definitions remain in `src/data/workout.js` so historical log entries and progress charts still resolve correctly.
 
 ---
 
@@ -101,9 +112,11 @@ estimated 1RM = weight × (1 + reps / 30)
 **Progression:** Add 2.5 kg (upper body) or 5 kg (lower body) when the top of the rep range is hit cleanly across all sets for two consecutive sessions.
 
 **Deload triggers (app monitors automatically):**
-- Same lift stalls for 3 consecutive sessions
-- Fatigue rated 4 or 5 on 2 of the last 3 sessions
-- 7 consecutive weeks without a deload (hard cap fallback)
+- Same lift shows a strictly declining estimated 1RM across 3 consecutive sessions
+- Fatigue rated 4 or 5 on 2 of the last 3 sessions — this counts *all* sessions, including running and station work
+- 7 consecutive weeks (49 days) without a deload (hard cap fallback)
+
+The stall trigger deliberately stays lift-only: it is built on 1RM estimates, which have no meaning for a run or a wall-ball set. The banner is suppressed during the Taper phase, which is already a planned deload.
 
 When triggered, the app shows a banner recommending a deload. Deload format: drop one set per exercise, reduce load to 60% 1RM, keep all movements the same.
 
@@ -126,6 +139,7 @@ When triggered, the app shows a banner recommending a deload. Deload format: dro
 | `bjj_1rm_{username}` | Lift name → current estimated 1RM (kg) |
 | `bjj_log_{username}` | Array of session log entries |
 | `bjj_block_{username}` | Current block week number and start date |
+| `bjj_hyrox_{username}` | Race date, plan start date, and optional manual week override |
 
 ---
 

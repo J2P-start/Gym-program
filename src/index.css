@@ -606,3 +606,126 @@ html, body, #root {
 .name-edit-row .btn-primary { width: auto; padding: 14px 20px; }
 
 .switch-btn { color: #60a5fa; background: rgba(96, 165, 250, 0.1); }
+
+/* ── Hyrox plan ───────────────────────────────────────── */
+.phase-badge {
+  font-size: 12px;
+  font-weight: 800;
+  padding: 5px 12px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: var(--bg3);
+  color: var(--text);
+}
+.phase-base  { background: rgba(74, 222, 128, 0.18); color: var(--accent); }
+.phase-build { background: rgba(96, 165, 250, 0.18); color: #60a5fa; }
+.phase-peak  { background: rgba(251, 191, 36, 0.18); color: var(--warn); }
+.phase-taper { background: rgba(167, 139, 250, 0.18); color: #a78bfa; }
+
+.plan-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text2);
+  margin-bottom: 8px;
+}
+.plan-week { color: var(--text); font-weight: 700; }
+.plan-sep { opacity: 0.4; }
+.race-countdown { color: var(--warn); font-weight: 600; }
+.block-badge-inline { opacity: 0.7; }
+
+.phase-focus {
+  font-size: 14px;
+  color: var(--text2);
+  line-height: 1.45;
+  margin-bottom: 4px;
+}
+.phase-bjj {
+  font-size: 13px;
+  color: var(--text2);
+  opacity: 0.8;
+  margin-bottom: 14px;
+}
+
+.week-label { display: flex; align-items: center; gap: 8px; }
+.week-phase-tag {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.day-chip:disabled { opacity: 0.55; cursor: default; }
+.type-run .day-abbr      { color: #60a5fa; }
+.type-hyrox .day-abbr    { color: var(--warn); }
+.type-sim .day-abbr      { color: #f472b6; }
+.type-mobility .day-abbr { color: #a78bfa; }
+.type-rest .day-abbr     { color: var(--text2); }
+.type-race .day-abbr     { color: var(--danger); }
+.type-race .day-type     { color: var(--danger); font-weight: 800; }
+
+.attached-session {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--bg3);
+}
+.attached-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text2);
+  margin-bottom: 4px;
+}
+.attached-session h3 { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+.attached-session .btn-secondary { margin-top: 12px; }
+
+/* Station race spec + pacing guidance on exercise cards */
+.race-spec {
+  display: block;
+  font-size: 12px;
+  color: var(--text2);
+  margin-bottom: 2px;
+}
+.effort-hint {
+  display: block;
+  font-size: 12px;
+  color: #60a5fa;
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+
+.finish-early-btn { margin-top: 12px; }
+
+/* Settings — plan section */
+.plan-status {
+  background: var(--bg);
+  border: 1px solid var(--bg3);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  margin-bottom: 14px;
+}
+.plan-status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  color: var(--text2);
+  padding: 3px 0;
+}
+.plan-status-row strong { color: var(--text); }
+
+.settings-field { display: block; margin-bottom: 12px; }
+.settings-field > span {
+  display: block;
+  font-size: 13px;
+  color: var(--text2);
+  margin-bottom: 6px;
+}
+.settings-field .name-input { width: 100%; }
+select.name-input { appearance: none; }
