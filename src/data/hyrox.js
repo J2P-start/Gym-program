@@ -12,6 +12,12 @@
 //
 // plus one new loadType, 'fixed', for race-spec loads that aren't 1RM-derived
 // and aren't manually entered (the sled is 152 kg whether you like it or not).
+//
+// percentRange follows the same [low, high] ramp as the strength sessions (see
+// utils/progression.js): the working percentage climbs from low toward high
+// across the block. Base and Build carry a small ramp; Peak and Taper are
+// deliberately flat, because both phases are explicitly about maintaining
+// rather than chasing new numbers this close to race day.
 
 export const DEFAULT_HYROX = {
   planStartDate: '2026-08-10', // Monday of plan week 1
@@ -385,9 +391,9 @@ define({
   kind: 'strength',
   note: 'Maintain, do not chase new numbers this close to race day. Bar speed is the target on every rep.',
   exercises: [
-    { name: 'Back squat',               sets: 2, reps: 3, repLabel: '3', loadType: 'percent', percentRange: [65, 68], restSeconds: 180, isLower: true, effort: 'Focus on bar speed, not load' },
-    { name: 'Power clean / hang clean', sets: 3, reps: 2, repLabel: '2', loadType: 'percent', percentRange: [78, 80], restSeconds: 150, isLower: false, effort: 'Crisp and fast — stop the moment speed drops' },
-    { name: 'Barbell hip thrust',       sets: 2, reps: 5, repLabel: '5', loadType: 'percent', percentRange: [65, 68], restSeconds: 120, isLower: true },
+    { name: 'Back squat',               sets: 2, reps: 3, repLabel: '3', loadType: 'percent', percentRange: [65, 65], restSeconds: 180, isLower: true, effort: 'Focus on bar speed, not load' },
+    { name: 'Power clean / hang clean', sets: 3, reps: 2, repLabel: '2', loadType: 'percent', percentRange: [78, 78], restSeconds: 150, isLower: false, effort: 'Crisp and fast — stop the moment speed drops' },
+    { name: 'Barbell hip thrust',       sets: 2, reps: 5, repLabel: '5', loadType: 'percent', percentRange: [65, 65], restSeconds: 120, isLower: true },
     ...MOBILITY,
   ],
 });
@@ -461,8 +467,8 @@ define({
   kind: 'strength',
   note: 'Enough to keep the pattern, nowhere near enough to cost you anything. In and out.',
   exercises: [
-    { name: 'Back squat',         sets: 2, reps: 3, repLabel: '3', loadType: 'percent', percentRange: [60, 62], restSeconds: 150, isLower: true, effort: 'Light and fast' },
-    { name: 'Barbell hip thrust', sets: 2, reps: 5, repLabel: '5', loadType: 'percent', percentRange: [60, 62], restSeconds: 120, isLower: true },
+    { name: 'Back squat',         sets: 2, reps: 3, repLabel: '3', loadType: 'percent', percentRange: [60, 60], restSeconds: 150, isLower: true, effort: 'Light and fast' },
+    { name: 'Barbell hip thrust', sets: 2, reps: 5, repLabel: '5', loadType: 'percent', percentRange: [60, 60], restSeconds: 120, isLower: true },
     ...MOBILITY,
   ],
 });
@@ -554,7 +560,7 @@ export const HYROX_SESSIONS = S;
 
 const BJJ = (day, label = 'BJJ', attachedId = null) => ({ day, type: 'bjj', label, sessionId: null, attachedId });
 const REST = (day, label = 'Rest', attachedId = null) => ({ day, type: 'rest', label, sessionId: null, attachedId });
-const RECOVERY = (day, attachedId = null, label = 'Recovery') => ({ day, type: 'recovery', label, sessionId: null, attachedId });
+const RECOVERY = (day, attachedId = null, label = 'Rec') => ({ day, type: 'recovery', label, sessionId: null, attachedId });
 const DO = (day, sessionId, label) => ({ day, type: S[sessionId].kind === 'strength' ? 'gym' : S[sessionId].kind, label, sessionId, attachedId: null });
 
 /**
@@ -572,13 +578,13 @@ export function getWeekTemplate(week) {
     // Week 1 sets the baseline instead.
     const sundayRun = week === 1 ? 'base-run-baseline' : week % 2 === 0 ? 'base-run-threshold' : 'base-run-easy';
     return [
-      DO('Monday', 'base-strength-a', 'Strength'),
+      DO('Monday', 'base-strength-a', 'Lift'),
       BJJ('Tuesday'),
-      DO('Wednesday', wednesday, week === 3 || week === 5 ? 'Intervals' : 'Circuit'),
+      DO('Wednesday', wednesday, week === 3 || week === 5 ? '400s' : 'Circuit'),
       BJJ('Thursday'),
-      DO('Friday', 'base-strength-b', 'Strength'),
+      DO('Friday', 'base-strength-b', 'Lift'),
       BJJ('Saturday'),
-      RECOVERY('Sunday', sundayRun, 'Recovery + run'),
+      RECOVERY('Sunday', sundayRun, 'Rec+run'),
     ];
   }
 
@@ -590,13 +596,13 @@ export function getWeekTemplate(week) {
       ? 'build-sim-long'
       : week % 2 === 1 ? 'build-sim-a' : 'build-sim-b';
     return [
-      DO('Monday', 'build-strength', 'Strength'),
+      DO('Monday', 'build-strength', 'Lift'),
       BJJ('Tuesday'),
-      DO('Wednesday', wednesday, week === 9 || week === 12 ? 'Sim +' : 'Sim'),
-      BJJ('Thursday', 'BJJ + run', 'build-run-tempo'),
-      DO('Friday', 'build-station-endurance', 'Stations'),
+      DO('Wednesday', wednesday, week === 9 || week === 12 ? 'Sim+' : 'Sim'),
+      BJJ('Thursday', 'BJJ+run', 'build-run-tempo'),
+      DO('Friday', 'build-station-endurance', 'Stns'),
       BJJ('Saturday'),
-      RECOVERY('Sunday', 'build-zone2', 'Recovery + Z2'),
+      RECOVERY('Sunday', 'build-zone2', 'Rec+Z2'),
     ];
   }
 
@@ -604,34 +610,34 @@ export function getWeekTemplate(week) {
   if (week <= 15) {
     const wednesday = week === 13 ? 'peak-sim-half' : 'peak-sim-full';
     return [
-      DO('Monday', 'peak-strength', 'Strength'),
+      DO('Monday', 'peak-strength', 'Lift'),
       BJJ('Tuesday'),
-      DO('Wednesday', wednesday, week === 13 ? 'Half sim' : 'Full sim'),
-      DO('Thursday', 'peak-compromised', 'Intervals'),
+      DO('Wednesday', wednesday, week === 13 ? 'Sim ×4' : 'Sim ×8'),
+      DO('Thursday', 'peak-compromised', 'Int'),
       REST('Friday', 'Rest', 'mobility-only'),
       BJJ('Saturday'),
-      RECOVERY('Sunday', null, 'Recovery'),
+      RECOVERY('Sunday', null, 'Rec'),
     ];
   }
 
   // TAPER week 16 — volume down ~40%.
   if (week === 16) {
     return [
-      DO('Monday', 'taper-strength', 'Strength'),
+      DO('Monday', 'taper-strength', 'Lift'),
       BJJ('Tuesday', 'BJJ light'),
-      DO('Wednesday', 'taper-sharpener', 'Sharpener'),
-      DO('Thursday', 'taper-run-easy', 'Easy run'),
+      DO('Wednesday', 'taper-sharpener', 'Sharp'),
+      DO('Thursday', 'taper-run-easy', 'Run'),
       REST('Friday', 'Rest', 'mobility-only'),
       BJJ('Saturday', 'BJJ light'),
-      RECOVERY('Sunday', null, 'Recovery'),
+      RECOVERY('Sunday', null, 'Rec'),
     ];
   }
 
   // TAPER week 17 — race week.
   return [
-    DO('Monday', 'race-week-technique', 'Technique'),
-    DO('Tuesday', 'race-week-technique-2', 'Technique'),
-    DO('Wednesday', 'race-week-opener', 'Opener'),
+    DO('Monday', 'race-week-technique', 'Tech'),
+    DO('Tuesday', 'race-week-technique-2', 'Tech'),
+    DO('Wednesday', 'race-week-opener', 'Open'),
     REST('Thursday', 'Rest', 'mobility-only'),
     REST('Friday', 'Rest'),
     REST('Saturday', 'Rest', 'race-week-shakeout'),

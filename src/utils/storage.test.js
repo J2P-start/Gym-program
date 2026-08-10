@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect, beforeEach } from 'vitest';
 import { getLogs, addLog, getLastSession } from './storage';
+import { localDateStr } from './dates';
 
 // Use a real localStorage shim provided by vitest's jsdom environment
 beforeEach(() => {
@@ -12,9 +13,9 @@ function log(session, date) {
 }
 
 describe('getLastSession', () => {
-  const TODAY = new Date().toISOString().slice(0, 10);
-  const YESTERDAY = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
-  const TWO_DAYS_AGO = new Date(Date.now() - 2 * 86400000).toISOString().slice(0, 10);
+  const TODAY = localDateStr();
+  const YESTERDAY = localDateStr(new Date(Date.now() - 86400000));
+  const TWO_DAYS_AGO = localDateStr(new Date(Date.now() - 2 * 86400000));
 
   it('returns null when there are no logs', () => {
     expect(getLastSession('user', 'Monday — Push & Legs')).toBeNull();

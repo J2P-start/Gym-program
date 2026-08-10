@@ -1,18 +1,20 @@
 import { useMemo, useState } from 'react';
 import { getWeekTemplate, DAY_CARD_COPY, TOTAL_WEEKS } from '../data/hyrox';
 import { getSessionById } from '../data/sessions';
-import { getBlock, getHyrox } from '../utils/storage';
+import { getHyrox } from '../utils/storage';
 import { checkDeload } from '../utils/deload';
+import { trainingWeek } from '../utils/progression';
+import { localDateStr } from '../utils/dates';
 import { currentPlanWeek, phaseForWeek, weekWithinPhase, daysUntilRace, dateForPlanDay } from '../utils/hyroxPhase';
 
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const WEEKS_TO_SHOW = 4;
 
-export default function Home({ user, onStartSession, onDismissDeload, deloadDismissed, onSwitchUser, lastFinished }) {
+export default function Home({ user, onStartSession, onDismissDeload, deloadDismissed, lastFinished }) {
   const todayName = DAY_NAMES[new Date().getDay()];
-  const todayDateStr = new Date().toISOString().slice(0, 10);
+  const todayDateStr = localDateStr();
 
-  const block = useMemo(() => getBlock(user), [user, lastFinished]);
+  const blockWeek = useMemo(() => trainingWeek(user), [user, lastFinished]);
   const deload = useMemo(() => checkDeload(user), [user, lastFinished]);
   const hyrox = useMemo(() => getHyrox(user), [user, lastFinished]);
 
@@ -54,7 +56,7 @@ export default function Home({ user, onStartSession, onDismissDeload, deloadDism
     <div className="home">
       <div className="home-header">
         <span className={`phase-badge phase-${phase.key}`}>{phase.name}</span>
-        <button className="user-badge-btn" onClick={onSwitchUser}>{user} ↓</button>
+        <span className="user-badge">{user}</span>
       </div>
 
       <div className="plan-meta">
@@ -70,7 +72,7 @@ export default function Home({ user, onStartSession, onDismissDeload, deloadDism
           </>
         )}
         <span className="plan-sep">·</span>
-        <span className="block-badge-inline">Block wk {block.week}</span>
+        <span className="block-badge-inline">Block wk {blockWeek}</span>
       </div>
 
       <p className="phase-focus">{phase.focus}</p>
@@ -98,7 +100,7 @@ export default function Home({ user, onStartSession, onDismissDeload, deloadDism
             </div>
             <div className="week-strip">
               {days.map((day, di) => {
-                const dateStr = dates[di]?.toISOString().slice(0, 10);
+                const dateStr = dates[di] ? localDateStr(dates[di]) : null;
                 const isToday = isCurrent && day.day === todayName;
                 const isSelected = isCurrent && di === selectedDayIndex;
                 return (
