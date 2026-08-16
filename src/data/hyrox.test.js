@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { getWeekTemplate, HYROX_SESSIONS, STATIONS, TOTAL_WEEKS } from './hyrox';
+import { getWeekTemplate, HYROX_SESSIONS, STATIONS, TOTAL_WEEKS, PHASES } from './hyrox';
+import { phaseForWeek } from '../utils/hyroxPhase';
 import { getSessionById } from './sessions';
 import { SESSIONS, TRACKED_LIFTS } from './workout';
 
@@ -152,6 +153,57 @@ describe('pacing language', () => {
         .join(' ')
         .replace(negated, '');
       expect(text.match(banned), `${session.id}: ${text.match(banned)?.[0]}`).toBeNull();
+    }
+  });
+});
+
+describe('running volume targets', () => {
+  // The volume chart draws each phase's runTargetKm as a band. If the sessions
+  // a week actually prescribes fall outside that band, the chart tells you
+  // you're under-training when you're following the plan exactly — so the two
+  // have to stay in step.
+  function prescribedKm(week) {
+    let metres = 0;
+    for (const day of getWeekTemplate(week)) {
+      for (const id of [day.sessionId, day.attachedId]) {
+        if (!id) continue;
+        for (const ex of getSessionById(id).exercises) {
+          if (ex.metric !== 'run') continue;
+          const d = ex.defaults?.distance;
+          if (typeof d === 'number' && d > 0) metres += d * ex.sets;
+        }
+      }
+    }
+    return metres / 1000;
+  }
+
+  it.each(ALL_WEEKS)('week %i prescribes running inside its phase target band', (week) => {
+    const { runTargetKm, name } = phaseForWeek(week);
+    const km = prescribedKm(week);
+    expect(km, `${name} week ${week}: ${km} km vs ${runTargetKm.join('–')} km`).toBeGreaterThanOrEqual(runTargetKm[0]);
+    expect(km, `${name} week ${week}: ${km} km vs ${runTargetKm.join('–')} km`).toBeLessThanOrEqual(runTargetKm[1]);
+  });
+
+  it('gives every phase a running target', () => {
+    for (const phase of PHASES) {
+      expect(phase.runTargetKm, phase.name).toHaveLength(2);
+      expect(phase.runTargetKm[0]).toBeLessThan(phase.runTargetKm[1]);
+    }
+  });
+
+  it('pre-fills a distance on every timed run block, so volume is one tap not typing', () => {
+    for (const week of ALL_WEEKS) {
+      for (const day of getWeekTemplate(week)) {
+        for (const id of [day.sessionId, day.attachedId]) {
+          if (!id) continue;
+          for (const ex of getSessionById(id).exercises) {
+            // Zone 2 is deliberately blank: it may be a bike or row, and only
+            // a run should count toward running volume.
+            if (ex.metric !== 'run' || ex.id === 'z2') continue;
+            expect(typeof ex.defaults?.distance, `${id} / ${ex.name}`).toBe('number');
+          }
+        }
+      }
     }
   });
 });

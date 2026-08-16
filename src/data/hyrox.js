@@ -34,7 +34,7 @@ export const PHASES = [
     firstWeek: 1,
     lastWeek: 6,
     bjj: '3× — Tue / Thu / Sat',
-    runTargetKm: [12, 15],
+    runTargetKm: [5, 9],
     focus: 'Aerobic engine, strength held at maintenance, station technique grooved.',
   },
   {
@@ -43,7 +43,7 @@ export const PHASES = [
     firstWeek: 7,
     lastWeek: 12,
     bjj: '3× — Tue / Thu / Sat',
-    runTargetKm: [15, 25],
+    runTargetKm: [9, 16],
     focus: 'Compromised running becomes the centrepiece. Station volume up, doubles pacing introduced.',
   },
   {
@@ -52,7 +52,7 @@ export const PHASES = [
     firstWeek: 13,
     lastWeek: 15,
     bjj: '2× — Tue / Sat',
-    runTargetKm: [15, 20],
+    runTargetKm: [7, 11],
     focus: 'Doubles simulations with your partner, split strategy settled, weak points drilled.',
   },
   {
@@ -61,7 +61,7 @@ export const PHASES = [
     firstWeek: 16,
     lastWeek: 17,
     bjj: '1–2×, light',
-    runTargetKm: [6, 10],
+    runTargetKm: [4, 6],
     focus: 'Volume down 40–60%, sharpness up. Arrive fresh, not fit-but-flat.',
   },
 ];
@@ -258,7 +258,7 @@ define({
   kind: 'run',
   note: 'Your aerobic engine session. Doubles as the Sunday Zone 2 piece — keep it truly easy and it will do more for race day than pushing it would.',
   exercises: [
-    run({ id: 'run-easy', name: 'Easy run', sets: 1, meters: '', repLabel: '30–40 min', effort: EFFORT.conversational }),
+    run({ id: 'run-easy', name: 'Easy run', sets: 1, meters: 6500, repLabel: '30–40 min', effort: EFFORT.conversational }),
   ],
 });
 
@@ -270,7 +270,7 @@ define({
   kind: 'run',
   note: 'Comfortably hard, not hard. If the last rep is falling apart, the first two were too quick.',
   exercises: [
-    run({ id: 'run-threshold', name: '6 min efforts', sets: 4, meters: '', repLabel: '6 min', effort: EFFORT.comfortablyHard, rest: 90 }),
+    run({ id: 'run-threshold', name: '6 min efforts', sets: 4, meters: 1200, repLabel: '6 min', effort: EFFORT.comfortablyHard, rest: 90 }),
   ],
 });
 
@@ -354,7 +354,7 @@ define({
   kind: 'run',
   note: 'Tagged onto your BJJ day. If the week already feels heavy, drop this one — the aerobic base from Phase 1 is what protects you, not forcing every session through.',
   exercises: [
-    run({ id: 'run-blocks', name: '6 min blocks', sets: 5, meters: '', repLabel: '6 min', effort: 'A pace you could hold a broken conversation at', rest: 90 }),
+    run({ id: 'run-blocks', name: '6 min blocks', sets: 5, meters: 1200, repLabel: '6 min', effort: 'A pace you could hold a broken conversation at', rest: 90 }),
   ],
 });
 
@@ -382,9 +382,9 @@ define({
   name: 'Zone 2 — 35–45 min',
   duration: '35–45 min',
   kind: 'run',
-  note: 'Bike, row or easy run — your choice. This is the aerobic engine session, so keep it truly easy. Sits alongside your usual sauna protocol.',
+  note: 'Bike, row or easy run — your choice. This is the aerobic engine session, so keep it truly easy. Sits alongside your usual sauna protocol. If you run it, enter the distance and it counts toward your weekly running volume; leave distance blank for a bike or row.',
   exercises: [
-    timed({ id: 'z2', name: 'Zone 2 — bike, row or easy run', label: '35–45 min', effort: EFFORT.easy }),
+    run({ id: 'z2', name: 'Zone 2 — easy run, bike or row', sets: 1, meters: '', repLabel: '35–45 min', effort: EFFORT.easy }),
   ],
 });
 
@@ -501,7 +501,7 @@ define({
   kind: 'run',
   note: 'Short and conversational. Nothing to prove here.',
   exercises: [
-    run({ id: 'run-easy', name: 'Easy run', sets: 1, meters: '', repLabel: '20–25 min', effort: EFFORT.conversational }),
+    run({ id: 'run-easy', name: 'Easy run', sets: 1, meters: 4000, repLabel: '20–25 min', effort: EFFORT.conversational }),
   ],
 });
 
@@ -555,7 +555,7 @@ define({
   kind: 'run',
   note: 'Optional. Only if sitting still feels worse than moving. Walk or very easy jog.',
   exercises: [
-    run({ id: 'run-shakeout', name: 'Shakeout walk / jog', sets: 1, meters: '', repLabel: '10–15 min', effort: EFFORT.easy }),
+    run({ id: 'run-shakeout', name: 'Shakeout walk / jog', sets: 1, meters: 2000, repLabel: '10–15 min', effort: EFFORT.easy }),
   ],
 });
 
