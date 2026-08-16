@@ -31,7 +31,8 @@ src/
 ├── components/
 │   ├── Home.jsx            # Weekly schedule, session picker, deload banner
 │   ├── SessionScreen.jsx   # Active workout UI (warm-up, collapsible cards, set logging)
-│   ├── Progress.jsx        # Charts and session history log
+│   ├── Progress.jsx        # Hyrox metrics, lift charts, session history
+│   ├── SessionDetail.jsx   # Read-only view of one logged session
 │   ├── Settings.jsx        # Manual 1RM management
 │   ├── Recovery.jsx        # Recovery day checklist
 │   └── ProfileSelector.jsx # First-run name setup (single athlete)
@@ -44,6 +45,7 @@ src/
 │   ├── oneRM.js            # Epley formula, workingWeight(), bestEstimated1RM()
 │   ├── deload.js           # Deload trigger logic (fatigue, stall, 7-week cap)
 │   ├── hyroxPhase.js       # Date → plan week → phase
+│   ├── hyroxStats.js       # Run pace/volume + station rates, read back from logs
 │   └── time.js             # parseTime()/formatTime() for mm:ss durations
 ├── index.css               # All styles (~600 lines, dark theme, CSS variables)
 └── App.jsx                 # Top-level routing and state
@@ -123,6 +125,17 @@ Defined in `src/data/workout.js`. Each exercise has a `loadType`:
 - **`currentPlanWeek(config)`** — derives the week from the calendar unless `weekOverride` is set in Settings.
 - **Sessions are looked up by id**, via `getSessionById()`. The legacy BJJ sessions stay in the registry so old logs resolve.
 - **Pacing language** — the plan targets a comfortable, sustainable race. Session copy uses controlled-effort framing, never max-effort. `src/data/hyrox.test.js` enforces this.
+
+## Hyrox Metrics
+
+Run and station exercises carry `metric: 'run'` / `metric: 'station'` (plus `stationKey`). Logs only store exercise *names*, so `hyrox.js` exports `RUN_EXERCISE_NAMES` and `STATION_NAME_TO_KEY`, derived from those tags, and `utils/hyroxStats.js` uses them to classify logged exercises without string heuristics.
+
+- **`weeklyRunVolume(logs)`** — km per Mon–Sun week. Counts `metric: 'run'` only, so SkiErg/row metres never inflate running volume.
+- **`runSessions(logs)`** — distance and average pace per session. Pace averages only over sets with a time, so an untimed leg can't skew it.
+- **`stationSummary(logs)`** — per-station session count, latest volume, and best rate. Normalised as sec/100 m for distance stations (lower is better) and reps/min for rep stations (higher is better), so sessions of different volumes compare.
+- Phases carry `runTargetKm: [low, high]`, drawn as a band on the volume chart.
+
+The Progress tab splits into **Hyrox** (volume, pace, stations) and **Strength** (the unchanged 1RM charts). Session history entries are buttons that open `SessionDetail`.
 
 ## Deload Logic
 

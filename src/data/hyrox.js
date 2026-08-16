@@ -34,6 +34,7 @@ export const PHASES = [
     firstWeek: 1,
     lastWeek: 6,
     bjj: '3× — Tue / Thu / Sat',
+    runTargetKm: [12, 15],
     focus: 'Aerobic engine, strength held at maintenance, station technique grooved.',
   },
   {
@@ -42,6 +43,7 @@ export const PHASES = [
     firstWeek: 7,
     lastWeek: 12,
     bjj: '3× — Tue / Thu / Sat',
+    runTargetKm: [15, 25],
     focus: 'Compromised running becomes the centrepiece. Station volume up, doubles pacing introduced.',
   },
   {
@@ -50,6 +52,7 @@ export const PHASES = [
     firstWeek: 13,
     lastWeek: 15,
     bjj: '2× — Tue / Sat',
+    runTargetKm: [15, 20],
     focus: 'Doubles simulations with your partner, split strategy settled, weak points drilled.',
   },
   {
@@ -58,6 +61,7 @@ export const PHASES = [
     firstWeek: 16,
     lastWeek: 17,
     bjj: '1–2×, light',
+    runTargetKm: [6, 10],
     focus: 'Volume down 40–60%, sharpness up. Arrive fresh, not fit-but-flat.',
   },
 ];
@@ -103,6 +107,7 @@ function run({ id, name, sets, meters, effort, rest = 0, repLabel }) {
     repLabel: repLabel ?? `${meters} m`,
     loadType: 'note',
     note: effort,
+    metric: 'run',
     track: ['distance', 'time'],
     defaults: { distance: meters },
     restSeconds: rest,
@@ -137,6 +142,8 @@ function station(key, { sets = 1, reps = null, repLabel, meters, effort = EFFORT
     fixedLabel: s.fixedLabel,
     fixedWeight: s.fixedWeight,
     raceSpec: s.raceSpec,
+    metric: 'station',
+    stationKey: key,
     note: s.fixedLabel ? undefined : effort,
     effort,
     track: track ?? s.track,
@@ -553,6 +560,18 @@ define({
 });
 
 export const HYROX_SESSIONS = S;
+
+// Logs store exercise names, not definitions, so these let the stats layer
+// classify a logged exercise without resorting to string heuristics.
+export const RUN_EXERCISE_NAMES = new Set(
+  Object.values(S).flatMap((sess) => sess.exercises.filter((e) => e.metric === 'run').map((e) => e.name))
+);
+
+export const STATION_NAME_TO_KEY = new Map(
+  Object.values(S).flatMap((sess) =>
+    sess.exercises.filter((e) => e.metric === 'station').map((e) => [e.name, e.stationKey])
+  )
+);
 
 /* ------------------------------------------------------------------ */
 /* Weekly templates                                                     */

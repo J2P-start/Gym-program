@@ -737,3 +737,135 @@ html, body, #root {
 }
 .settings-field .name-input { width: 100%; }
 select.name-input { appearance: none; }
+
+/* ── Hyrox metrics ────────────────────────────────────── */
+.chart-sub {
+  font-size: 13px;
+  color: var(--text2);
+  margin: -6px 0 12px;
+}
+.chart-sub strong { color: var(--text); font-weight: 600; }
+
+.station-table { display: flex; flex-direction: column; }
+.station-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--bg3);
+}
+.station-row:first-child { border-top: none; }
+.station-row.untrained { opacity: 0.55; }
+.station-name {
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.station-spec { font-size: 11px; color: var(--text2); font-weight: 400; }
+.station-stats {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  font-size: 12px;
+  color: var(--text2);
+  text-align: right;
+  white-space: nowrap;
+}
+.station-count { color: var(--text); font-weight: 600; }
+.station-best { color: #a8e8cf; }
+.station-none { font-style: italic; }
+
+/* History items are buttons now — they open the session detail view */
+.history-item {
+  width: 100%;
+  text-align: left;
+  border: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.history-item:active { background: var(--bg3); }
+.history-chevron { margin-left: auto; color: var(--text2); font-size: 16px; }
+
+/* ── Session detail ───────────────────────────────────── */
+.session-detail { padding-bottom: 24px; }
+.detail-date { font-size: 13px; color: var(--text2); }
+.detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--text2);
+  margin-bottom: 18px;
+}
+
+.detail-pr-summary {
+  background: var(--accent);
+  color: var(--on-accent);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+.detail-pr-summary h3 { font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+.detail-pr-summary .orm-row { color: var(--on-accent); }
+/* .orm-row colours its value with --accent, which is this card's own
+   background — so it needs the dark on-accent colour here instead. */
+.detail-pr-summary .orm-row span:last-child { color: var(--on-accent); }
+
+.detail-exercises { display: flex; flex-direction: column; gap: 12px; }
+.detail-exercise {
+  background: var(--bg2);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+}
+.detail-exercise-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+}
+.detail-exercise-head h3 { font-size: 15px; font-weight: 600; }
+.detail-pr {
+  background: var(--accent);
+  color: var(--on-accent);
+  border-radius: var(--pill);
+  padding: 2px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.detail-totals {
+  font-size: 12px;
+  color: #a8e8cf;
+  margin-top: 4px;
+}
+.detail-sets {
+  list-style: none;
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.detail-sets li {
+  display: flex;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--text2);
+}
+.detail-set-num {
+  min-width: 18px;
+  color: var(--text2);
+  opacity: 0.6;
+}
+.detail-skipped { font-size: 13px; color: var(--text2); font-style: italic; margin-top: 6px; }
+.detail-skipped-list {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--bg3);
+}
+.detail-skipped-list h3 { font-size: 13px; font-weight: 600; color: var(--text2); margin-bottom: 6px; }
+.detail-skipped-list p { font-size: 13px; color: var(--text2); opacity: 0.75; line-height: 1.5; }
