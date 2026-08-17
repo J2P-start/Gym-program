@@ -259,12 +259,14 @@ define({
   name: 'Easy Run',
   duration: '30–40 min',
   kind: 'run',
-  note: 'Your aerobic engine session. Doubles as the Sunday Zone 2 piece — keep it truly easy and it will do more for race day than pushing it would.',
+  note: 'Your third run of the week and the one that builds the aerobic engine. Recovery comes first here: if Saturday rolls were heavy or the legs feel beaten up, take the sauna and leave the run — that is a judgement call, not a missed session. When you do run it, keep it genuinely easy.',
   exercises: [
     run({ id: 'run-easy', name: 'Easy run', sets: 1, meters: 6500, repLabel: '30–40 min', effort: EFFORT.conversational }),
   ],
 });
 
+// No longer scheduled: threshold work belongs on Wednesday, not on the
+// recovery day. Kept defined so previously logged sessions still resolve.
 define({
   id: 'base-run-threshold',
   day: 'Sunday',
@@ -385,7 +387,7 @@ define({
   name: 'Zone 2 — 25–30 min',
   duration: '25–30 min',
   kind: 'run',
-  note: 'Shorter for the first two weeks of Build while the weekly running load steps up. Same rules as the full version: run it, keep it truly easy, and it sits alongside your usual sauna protocol.',
+  note: 'Shorter for the first two weeks of Build while the weekly running load steps up. Same rules as the full version: run it by preference, keep it genuinely easy, and let recovery come first — after a heavy Saturday, bike it or skip it and sauna.',
   exercises: [
     run({ id: 'z2', name: 'Zone 2 easy run', sets: 1, meters: 4500, repLabel: '25–30 min', effort: EFFORT.easy }),
   ],
@@ -397,7 +399,7 @@ define({
   name: 'Zone 2 — 35–45 min',
   duration: '35–45 min',
   kind: 'run',
-  note: 'Run this one. Cycling builds the aerobic engine but not the tendon and running-economy adaptations that running needs, and this is your third running exposure of the week. Keep it truly easy — it sits alongside your usual sauna protocol, not instead of it. If your legs are genuinely beaten up, bike or row it instead and clear the distance so it does not count as running volume.',
+  note: 'Run this one by preference — cycling builds the aerobic engine but not the tendon and running-economy adaptations that running needs, and this is your third running exposure of the week. It sits alongside your usual sauna protocol, not instead of it, and recovery comes first: after a heavy Saturday, bike it, row it, or skip it and sauna. If you do not run it, clear the distance so it does not count as running volume.',
   exercises: [
     run({ id: 'z2', name: 'Zone 2 easy run', sets: 1, meters: 6500, repLabel: '35–45 min', effort: EFFORT.easy }),
   ],
@@ -608,9 +610,10 @@ export function getWeekTemplate(week) {
   if (week <= 6) {
     // Weeks 3 and 5 swap the technique circuit for controlled 400s.
     const wednesday = week === 3 || week === 5 ? 'base-intervals' : 'base-technique';
-    // One pure running session a week, alternating easy and threshold.
-    // Week 1 sets the baseline instead.
-    const sundayRun = week === 1 ? 'base-run-baseline' : week % 2 === 0 ? 'base-run-threshold' : 'base-run-easy';
+    // One pure running session a week, always easy — Wednesday already
+    // carries the week's quality running, and a base phase should be
+    // overwhelmingly easy. Week 1 sets the baseline instead.
+    const sundayRun = week === 1 ? 'base-run-baseline' : 'base-run-easy';
     return [
       DO('Monday', 'base-strength-a', 'Lift'),
       BJJ('Tuesday'),

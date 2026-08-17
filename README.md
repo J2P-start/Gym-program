@@ -52,7 +52,7 @@ This plan targets a **comfortable, sustainable race**, not a maximal one. Every 
 
 \* Weeks 3 and 5 swap in controlled 400 m repeats.
 † Weeks 9 and 12 extend to 7 legs. Station set alternates weekly so all 8 are covered each fortnight.
-‡ Week 1 is a 3 km baseline time trial; thereafter alternating easy and threshold runs.
+‡ Week 1 is a 3 km baseline time trial; every week after that is an easy run. Sunday is recovery-first — after a heavy Saturday, take the sauna and leave the run.
 
 Race week (week 17) runs technique touches Mon/Tue, a short opener Wed, rest Thu–Sat with an optional shakeout, and the race on Sunday.
 
