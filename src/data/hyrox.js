@@ -34,7 +34,7 @@ export const PHASES = [
     firstWeek: 1,
     lastWeek: 6,
     bjj: '3× — Tue / Thu / Sat',
-    runTargetKm: [5, 9],
+    runTargetKm: [9, 13],
     focus: 'Aerobic engine, strength held at maintenance, station technique grooved.',
   },
   {
@@ -43,7 +43,7 @@ export const PHASES = [
     firstWeek: 7,
     lastWeek: 12,
     bjj: '3× — Tue / Thu / Sat',
-    runTargetKm: [9, 16],
+    runTargetKm: [15, 19],
     focus: 'Compromised running becomes the centrepiece. Station volume up, doubles pacing introduced.',
   },
   {
@@ -212,12 +212,15 @@ define({
   id: 'base-intervals',
   day: 'Wednesday',
   name: 'Controlled 400s + Stations',
-  duration: '~55 min',
+  duration: '~65 min',
   kind: 'run',
-  note: 'Fortnightly variation on the technique circuit. Steady controlled pace on the 400s — this is not a time trial.',
+  note: 'Fortnightly variation on the technique circuit. Steady controlled pace on the 400s — this is not a time trial. Stations still follow, so no Base week goes by barely touching the race movements.',
   exercises: [
     run({ id: 'run-400s', name: '400 m repeats', sets: 6, meters: 400, effort: EFFORT.controlled, rest: 90 }),
     station('ski',      { repLabel: '500 m', meters: 500, effort: EFFORT.steady }),
+    station('sledpush', { repLabel: '50 m',  meters: 50,  effort: EFFORT.steady }),
+    station('burpee',   { repLabel: '20 m',  meters: 20,  effort: EFFORT.steady }),
+    station('farmers',  { repLabel: '100 m', meters: 100, effort: EFFORT.steady }),
     station('wallball', { reps: 25, repLabel: '25 reps', effort: EFFORT.steady }),
   ],
 });
@@ -226,15 +229,15 @@ define({
   id: 'base-strength-b',
   day: 'Friday',
   name: 'Strength — Pull & Power',
-  duration: '~55 min',
+  duration: '~65 min',
   kind: 'strength',
-  note: "Trap bar keeps the pull heavy without the lower-back cost of a conventional deadlift — which matters when you're stacking it against running volume.",
+  note: "Trap bar keeps the pull heavy without the lower-back cost of a conventional deadlift — which matters when you're stacking it against running volume. The finisher is an easy run rather than an erg — it is your third running exposure of the week, and only running builds the tendon and economy adaptations that running needs. Keep it genuinely easy; Saturday BJJ still has to happen.",
   exercises: [
     { name: 'Trap bar deadlift',        sets: 3, reps: 5, repLabel: '5', loadType: 'percent', percentRange: [75, 78], restSeconds: 180, isLower: true },
     { name: 'Power clean / hang clean', sets: 3, reps: 3, repLabel: '3', loadType: 'percent', percentRange: [75, 75], restSeconds: 150, isLower: false, effort: 'Speed off the floor — bar velocity over load' },
     { id: 'carry-farmers-grip', name: 'Farmers carry', sets: 3, reps: null, repLabel: '40 m', loadType: 'note', note: 'Heavy — log the weight used', track: ['weight', 'distance'], defaults: { distance: 40 }, restSeconds: 90 },
     { name: 'Dead hang', sets: 3, reps: null, repLabel: '30–45 sec hold', loadType: 'bodyweight', track: ['time'], restSeconds: 60 },
-    timed({ id: 'fin-row', name: 'Row or SkiErg finisher', label: '10 min', effort: EFFORT.easy }),
+    run({ id: 'fin-run', name: 'Easy run finisher', sets: 1, meters: 4000, repLabel: '20–25 min', effort: EFFORT.conversational }),
   ],
 });
 
@@ -299,7 +302,7 @@ define({
   kind: 'sim',
   note: 'Run leg → station, six times through. Controlled sustainable effort, not maximal — the point is stringing legs together without technique falling apart. Stations rotate fortnightly so all 8 get covered.',
   exercises: [
-    run({ id: 'run-legs', name: 'Run legs', sets: 6, meters: 500, effort: EFFORT.steady }),
+    run({ id: 'run-legs', name: 'Run legs', sets: 6, meters: 800, effort: EFFORT.steady }),
     station('ski',      { repLabel: '500 m',   meters: 500, effort: EFFORT.steady }),
     station('sledpush', { repLabel: '50 m',    meters: 50,  effort: EFFORT.steady }),
     station('burpee',   { repLabel: '40 m',    meters: 40,  effort: EFFORT.steady }),
@@ -317,7 +320,7 @@ define({
   kind: 'sim',
   note: 'Alternate week station set — sled pull, lunge and row get their turn. Same controlled sustainable effort throughout.',
   exercises: [
-    run({ id: 'run-legs', name: 'Run legs', sets: 6, meters: 500, effort: EFFORT.steady }),
+    run({ id: 'run-legs', name: 'Run legs', sets: 6, meters: 800, effort: EFFORT.steady }),
     station('row',      { repLabel: '500 m', meters: 500, effort: EFFORT.steady }),
     station('sledpull', { repLabel: '50 m',  meters: 50,  effort: EFFORT.steady }),
     station('wallball', { reps: 40, repLabel: '40 reps', effort: EFFORT.steady }),
@@ -333,9 +336,9 @@ define({
   name: 'Doubles Simulation (Extended)',
   duration: '~80 min',
   kind: 'sim',
-  note: 'Every third week, stretch toward race volume — 7 legs instead of 6. Effort stays controlled; it is the length that is progressing, not the pace.',
+  note: 'Every third week the legs go to full race distance — 6 × 1 km. Effort stays controlled; it is the leg length that is progressing, not the pace. A 1 km leg punishes a fast start in a way a 500 m leg does not, which is exactly the pacing you need to rehearse.',
   exercises: [
-    run({ id: 'run-legs', name: 'Run legs', sets: 7, meters: 500, effort: EFFORT.steady }),
+    run({ id: 'run-legs', name: 'Run legs', sets: 6, meters: 1000, effort: EFFORT.steady }),
     station('ski',      { repLabel: '500 m', meters: 500, effort: EFFORT.steady }),
     station('sledpush', { repLabel: '50 m',  meters: 50,  effort: EFFORT.steady }),
     station('sledpull', { repLabel: '50 m',  meters: 50,  effort: EFFORT.steady }),
@@ -349,12 +352,12 @@ define({
 define({
   id: 'build-run-tempo',
   day: 'Thursday',
-  name: 'Easy–Moderate Run',
-  duration: '~40 min',
+  name: 'Easy Run',
+  duration: '30–40 min',
   kind: 'run',
-  note: 'Tagged onto your BJJ day. If the week already feels heavy, drop this one — the aerobic base from Phase 1 is what protects you, not forcing every session through.',
+  note: 'Tagged onto your BJJ day, and deliberately easy rather than threshold — Wednesday already supplies the hard running, and a second quality session in a week carrying three BJJ sessions buys fatigue rather than fitness. If the week already feels heavy, drop this one.',
   exercises: [
-    run({ id: 'run-blocks', name: '6 min blocks', sets: 5, meters: 1200, repLabel: '6 min', effort: 'A pace you could hold a broken conversation at', rest: 90 }),
+    run({ id: 'run-easy', name: 'Easy run', sets: 1, meters: 6000, repLabel: '30–40 min', effort: EFFORT.conversational }),
   ],
 });
 
@@ -377,14 +380,26 @@ define({
 });
 
 define({
+  id: 'build-zone2-short',
+  day: 'Sunday',
+  name: 'Zone 2 — 25–30 min',
+  duration: '25–30 min',
+  kind: 'run',
+  note: 'Shorter for the first two weeks of Build while the weekly running load steps up. Same rules as the full version: run it, keep it truly easy, and it sits alongside your usual sauna protocol.',
+  exercises: [
+    run({ id: 'z2', name: 'Zone 2 easy run', sets: 1, meters: 4500, repLabel: '25–30 min', effort: EFFORT.easy }),
+  ],
+});
+
+define({
   id: 'build-zone2',
   day: 'Sunday',
   name: 'Zone 2 — 35–45 min',
   duration: '35–45 min',
   kind: 'run',
-  note: 'Bike, row or easy run — your choice. This is the aerobic engine session, so keep it truly easy. Sits alongside your usual sauna protocol. If you run it, enter the distance and it counts toward your weekly running volume; leave distance blank for a bike or row.',
+  note: 'Run this one. Cycling builds the aerobic engine but not the tendon and running-economy adaptations that running needs, and this is your third running exposure of the week. Keep it truly easy — it sits alongside your usual sauna protocol, not instead of it. If your legs are genuinely beaten up, bike or row it instead and clear the distance so it does not count as running volume.',
   exercises: [
-    run({ id: 'z2', name: 'Zone 2 — easy run, bike or row', sets: 1, meters: '', repLabel: '35–45 min', effort: EFFORT.easy }),
+    run({ id: 'z2', name: 'Zone 2 easy run', sets: 1, meters: 6500, repLabel: '35–45 min', effort: EFFORT.easy }),
   ],
 });
 
@@ -411,12 +426,12 @@ define({
   name: 'Doubles Simulation — Half Race',
   duration: '~55 min',
   kind: 'sim',
-  note: 'Four full legs with your partner at the effort you actually intend to race at. Rehearse your station splits, not just the movements — the best split is found through practice, not assumed.',
+  note: 'Four full legs with your partner at the effort you actually intend to race at. Rehearse your station splits, not just the movements — the best split is found through practice, not assumed. Wall balls and burpees are in deliberately: they are your muscular-endurance limiters and this is no week to skip them. Sled pull gets its turn in the full simulations.',
   exercises: [
     run({ id: 'run-legs', name: 'Run legs (together)', sets: 4, meters: 1000, effort: EFFORT.steady }),
     station('ski',      { repLabel: 'Your share of 1000 m', meters: 500, effort: EFFORT.steady }),
     station('sledpush', { repLabel: 'Your share of 50 m',   meters: 25,  effort: EFFORT.steady }),
-    station('sledpull', { repLabel: 'Your share of 50 m',   meters: 25,  effort: EFFORT.steady }),
+    station('wallball', { reps: 50, repLabel: 'Your share of 100 reps', effort: EFFORT.steady }),
     station('burpee',   { repLabel: 'Your share of 80 m',   meters: 40,  effort: EFFORT.steady }),
   ],
 });
@@ -621,7 +636,7 @@ export function getWeekTemplate(week) {
       BJJ('Thursday', 'BJJ+run', 'build-run-tempo'),
       DO('Friday', 'build-station-endurance', 'Stns'),
       BJJ('Saturday'),
-      RECOVERY('Sunday', 'build-zone2', 'Rec+Z2'),
+      RECOVERY('Sunday', week <= 8 ? 'build-zone2-short' : 'build-zone2', 'Rec+Z2'),
     ];
   }
 

@@ -134,7 +134,10 @@ Run and station exercises carry `metric: 'run'` / `metric: 'station'` (plus `sta
 - **`runSessions(logs)`** — distance and average pace per session. Pace averages only over sets with a time, so an untimed leg can't skew it.
 - **`stationSummary(logs)`** — per-station session count, latest volume, and best rate. Normalised as sec/100 m for distance stations (lower is better) and reps/min for rep stations (higher is better), so sessions of different volumes compare.
 - Phases carry `runTargetKm: [low, high]`, drawn as a band on the volume chart. **These are derived from what the weekly templates actually prescribe, not from the plan document's headline figures** (12–15 km Base, 15–25 km Build), which its own sessions never reach. A test in `data/hyrox.test.js` fails if the prescribed distance for any week falls outside its phase band, so the two can't drift apart.
-- Time-based runs ("30–40 min easy", "4 × 6 min") carry a pre-filled `defaults.distance` estimated at conversational (~5:30/km) or threshold (~5:00/km) pace, so logging them is one tap. The Sunday Zone 2 block is deliberately left blank: it may be a bike or a row, and only a run should count toward running volume.
+- Time-based runs carry a pre-filled `defaults.distance` estimated at conversational (~5:30/km) or threshold (~5:00/km) pace, so logging them is one tap.
+- **Three running exposures a week**, placed in slots that already existed: Wednesday's circuit/sim, a Friday finisher in Base (an easy run rather than an erg), Thursday's run alongside BJJ in Build, and Sunday's Zone 2 run. The Mon/Wed/Fri + BJJ Tue/Thu/Sat + Sunday recovery rhythm is unchanged.
+- **Run-leg distance progresses toward race distance**: 300 m in Base, 800 m in Build, 1 km in the week-9/12 extended sims and throughout Peak. The race is 8 × 1 km, and a 1 km leg punishes a fast start in a way a 500 m leg does not.
+- Build weeks 7–8 use a shorter Sunday Zone 2 (`build-zone2-short`) so the Base→Build step is a ramp (13 → 15 → 17 km) rather than a spike.
 
 The Progress tab splits into **Hyrox** (volume, pace, stations) and **Strength** (the unchanged 1RM charts). Session history entries are buttons that open `SessionDetail`.
 
