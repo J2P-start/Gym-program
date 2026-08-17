@@ -240,7 +240,7 @@ define({
   exercises: [
     { name: 'Trap bar deadlift',        sets: 3, reps: 5, repLabel: '5', loadType: 'percent', percentRange: [75, 78], restSeconds: 180, isLower: true },
     { name: 'Power clean / hang clean', sets: 3, reps: 3, repLabel: '3', loadType: 'percent', percentRange: [75, 75], restSeconds: 150, isLower: false, effort: 'Speed off the floor — bar velocity over load' },
-    { id: 'carry-farmers-grip', name: 'Heavy farmers carry', sets: 3, reps: null, repLabel: '40 m', loadType: 'note', note: 'Heavy — log the weight used. Grip and posture work, not race pace', track: ['weight', 'distance'], defaults: { distance: 40 }, restSeconds: 90 },
+    { id: 'carry-farmers-grip', name: 'Heavy farmers carry', sets: 3, reps: null, repLabel: '40 m', loadType: 'note', note: '2 × 32 kg (64 kg total)', effort: 'Deliberately heavier than the race spec 2 × 24 kg, so race day feels light. Grip and posture, not speed — go up when 40 m stops challenging your grip', track: ['weight', 'distance'], defaults: { distance: 40, weight: 64 }, restSeconds: 90 },
     { name: 'Dead hang', sets: 3, reps: null, repLabel: '30–45 sec hold', loadType: 'bodyweight', track: ['time'], restSeconds: 60 },
     run({ id: 'fin-run', name: 'Easy run finisher', sets: 1, meters: 4000, repLabel: '20–25 min', effort: EFFORT.conversational }),
   ],

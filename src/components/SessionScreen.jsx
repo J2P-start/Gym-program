@@ -93,7 +93,9 @@ function SetRow({ setNum, exercise, oneRMs, isDeload, week, prevSet, onChange })
   const track = trackOf(exercise);
   const suggested = calcWeight(exercise, oneRMs, isDeload, week);
   const [values, setValues] = useState(() => ({
-    weight: suggested ?? prevSet?.actualWeight ?? '',
+    // Prescribed percentage wins, then what you actually lifted last time, then
+    // the prescribed starting load for exercises that name one.
+    weight: suggested ?? prevSet?.actualWeight ?? exercise.defaults?.weight ?? '',
     reps: exercise.reps ?? '',
     distance: exercise.defaults?.distance ?? '',
     time: '',
