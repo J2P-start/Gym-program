@@ -114,8 +114,13 @@ function run({ id, name, sets, meters, effort, rest = 0, repLabel }) {
   };
 }
 
-/** A time-only piece — erg finishers, Zone 2, mobility holds. */
-function timed({ id, name, sets = 1, label, effort, rest = 0 }) {
+/**
+ * A fixed-duration erg piece. The prescription pins the clock, so the metres
+ * covered is the variable worth logging — recording '10:00' against a
+ * prescription of '10 min' tells you nothing you didn't already know. Time is
+ * still tracked for the sessions where you run long or cut one short.
+ */
+function ergPiece({ id, name, sets = 1, label, effort, rest = 0 }) {
   return {
     id,
     name,
@@ -124,7 +129,7 @@ function timed({ id, name, sets = 1, label, effort, rest = 0 }) {
     repLabel: label,
     loadType: 'note',
     note: effort,
-    track: ['time'],
+    track: ['distance', 'time'],
     restSeconds: rest,
   };
 }
@@ -184,7 +189,7 @@ define({
     { name: 'Barbell hip thrust', sets: 3, reps: 8, repLabel: '8', loadType: 'percent', percentRange: [75, 78], restSeconds: 120, isLower: true, effort: 'Hip extension power — drives both running speed and sled push' },
     { name: 'Ab wheel rollout',  sets: 3, reps: 10, repLabel: '10', loadType: 'bodyweight', restSeconds: 60 },
     { name: 'Pallof press',      sets: 3, reps: 12, repLabel: '12 each side', loadType: 'note', note: 'Light–moderate', restSeconds: 60 },
-    timed({ id: 'fin-ski', name: 'SkiErg or row finisher', label: '10 min', effort: EFFORT.easy }),
+    ergPiece({ id: 'fin-ski', name: 'SkiErg or row finisher', label: '10 min', effort: EFFORT.easy }),
   ],
 });
 
@@ -235,7 +240,7 @@ define({
   exercises: [
     { name: 'Trap bar deadlift',        sets: 3, reps: 5, repLabel: '5', loadType: 'percent', percentRange: [75, 78], restSeconds: 180, isLower: true },
     { name: 'Power clean / hang clean', sets: 3, reps: 3, repLabel: '3', loadType: 'percent', percentRange: [75, 75], restSeconds: 150, isLower: false, effort: 'Speed off the floor — bar velocity over load' },
-    { id: 'carry-farmers-grip', name: 'Farmers carry', sets: 3, reps: null, repLabel: '40 m', loadType: 'note', note: 'Heavy — log the weight used', track: ['weight', 'distance'], defaults: { distance: 40 }, restSeconds: 90 },
+    { id: 'carry-farmers-grip', name: 'Heavy farmers carry', sets: 3, reps: null, repLabel: '40 m', loadType: 'note', note: 'Heavy — log the weight used. Grip and posture work, not race pace', track: ['weight', 'distance'], defaults: { distance: 40 }, restSeconds: 90 },
     { name: 'Dead hang', sets: 3, reps: null, repLabel: '30–45 sec hold', loadType: 'bodyweight', track: ['time'], restSeconds: 60 },
     run({ id: 'fin-run', name: 'Easy run finisher', sets: 1, meters: 4000, repLabel: '20–25 min', effort: EFFORT.conversational }),
   ],

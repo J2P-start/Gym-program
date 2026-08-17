@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getWeekTemplate, HYROX_SESSIONS, STATIONS, TOTAL_WEEKS, PHASES } from './hyrox';
+import { getWeekTemplate, HYROX_SESSIONS, STATIONS, TOTAL_WEEKS, PHASES, STATION_NAME_TO_KEY } from './hyrox';
 import { phaseForWeek } from '../utils/hyroxPhase';
 import { getSessionById } from './sessions';
 import { SESSIONS, TRACKED_LIFTS } from './workout';
@@ -203,6 +203,39 @@ describe('running volume targets', () => {
             expect(typeof ex.defaults?.distance, `${id} / ${ex.name}`).toBe('number');
           }
         }
+      }
+    }
+  });
+});
+
+describe('logging the variable, not the constant', () => {
+  const everyExercise = Object.values(HYROX_SESSIONS).flatMap((s) => s.exercises.map((e) => [s.id, e]));
+
+  it('logs distance for any piece whose prescription fixes the clock', () => {
+    // A 10-minute erg piece that records only its own duration back tells you
+    // nothing — the metres covered is the whole point. Second-based holds are
+    // exempt: for a dead hang the time IS the variable, and a stretch has no
+    // output worth measuring.
+    for (const [sessionId, ex] of everyExercise) {
+      if (!/^\d+(–\d+)?\s*min/.test(String(ex.repLabel))) continue;
+      expect(ex.track ?? [], `${sessionId} / ${ex.name} — prescribed "${ex.repLabel}"`).toContain('distance');
+    }
+  });
+
+  it('logs time for any piece whose prescription fixes the distance', () => {
+    for (const [sessionId, ex] of everyExercise) {
+      if (ex.metric !== 'run' && ex.metric !== 'station') continue;
+      if (!/\d+\s*m$/.test(String(ex.repLabel))) continue;
+      expect(ex.track ?? [], `${sessionId} / ${ex.name} — prescribed "${ex.repLabel}"`).toContain('time');
+    }
+  });
+
+  it('keeps non-station exercises out of the station stats', () => {
+    // Station stats key off exercise name, so a heavy grip carry named
+    // "Farmers carry" would be averaged in with race-spec station work.
+    for (const [sessionId, ex] of everyExercise) {
+      if (STATION_NAME_TO_KEY.has(ex.name)) {
+        expect(ex.metric, `${sessionId} / ${ex.name} shares a station name but is not station work`).toBe('station');
       }
     }
   });
