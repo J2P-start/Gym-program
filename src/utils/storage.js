@@ -1,7 +1,11 @@
+import { localDateStr } from './dates';
+import { DEFAULT_HYROX } from '../data/hyrox';
+
 const KEY_USERS = 'bjj_users';
 const key1RM = (u) => `bjj_1rm_${u}`;
 const keyLog = (u) => `bjj_log_${u}`;
 const keyBlock = (u) => `bjj_block_${u}`;
+const keyHyrox = (u) => `bjj_hyrox_${u}`;
 
 function get(key, fallback) {
   try {
@@ -52,7 +56,7 @@ export function addLog(username, entry) {
 
 export function getLastSession(username, sessionName) {
   const logs = getLogs(username);
-  const today = new Date().toISOString().slice(0, 10);
+  const today = localDateStr();
   for (let i = logs.length - 1; i >= 0; i--) {
     if (logs[i].session === sessionName && logs[i].date !== today) return logs[i];
   }
@@ -60,20 +64,37 @@ export function getLastSession(username, sessionName) {
 }
 
 export function getBlock(username) {
-  return get(keyBlock(username), { week: 1, startDate: new Date().toISOString().slice(0, 10), lastDeloadDate: null });
+  return get(keyBlock(username), { week: 1, startDate: localDateStr(), lastDeloadDate: null });
 }
 export function setBlock(username, data) { set(keyBlock(username), data); }
+
+/**
+ * Hyrox plan config: race date and an optional manual week override.
+ *
+ * planStartDate used to be stored here and is now derived from the race date,
+ * so it is stripped on read — otherwise it would be written back on every save
+ * and copied on rename indefinitely.
+ */
+export function getHyrox(username) {
+  // eslint-disable-next-line no-unused-vars -- destructured out to drop the key
+  const { planStartDate, ...stored } = get(keyHyrox(username), {});
+  return { ...DEFAULT_HYROX, ...stored };
+}
+export function setHyrox(username, data) { set(keyHyrox(username), { ...getHyrox(username), ...data }); }
 
 export function renameUser(oldName, newName) {
   const rms = get1RMs(oldName);
   const logs = getLogs(oldName);
   const block = getBlock(oldName);
+  const hyrox = getHyrox(oldName);
   setAll1RMs(newName, rms);
   set(keyLog(newName), logs);
   setBlock(newName, block);
+  set(keyHyrox(newName), hyrox);
   localStorage.removeItem(key1RM(oldName));
   localStorage.removeItem(keyLog(oldName));
   localStorage.removeItem(keyBlock(oldName));
+  localStorage.removeItem(keyHyrox(oldName));
   const users = getUsers().map((u) => (u === oldName ? newName : u));
   setUsers(users);
 }
