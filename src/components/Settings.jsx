@@ -5,7 +5,7 @@ import { get1RMs, setAll1RMs, getBlock, setBlock, getLogs, renameUser, getUsers,
 import { epley, bestEstimated1RM } from '../utils/oneRM';
 import { trainingWeek } from '../utils/progression';
 import { localDateStr } from '../utils/dates';
-import { currentPlanWeek, phaseForWeek, daysUntilRace } from '../utils/hyroxPhase';
+import { currentPlanWeek, phaseForWeek, daysUntilRace, planStartFor } from '../utils/hyroxPhase';
 
 function RMDelta({ baseline, current }) {
   if (!baseline || !current) return null;
@@ -31,6 +31,10 @@ export default function Settings({ user, onUserChange }) {
   const activeWeek = currentPlanWeek(hyrox);
   const activePhase = phaseForWeek(activeWeek);
   const toRace = daysUntilRace(hyrox);
+  const planStart = planStartFor(hyrox);
+  const startLabel = planStart
+    ? planStart.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })
+    : 'Set a race date';
 
   function updateHyrox(patch) {
     setHyroxState((prev) => ({ ...prev, ...patch }));
@@ -143,8 +147,9 @@ export default function Settings({ user, onUserChange }) {
       <section className="settings-section">
         <h3>Hyrox plan</h3>
         <p className="settings-hint">
-          17 weeks across Base, Build, Peak and Taper. The weekly schedule on Home follows
-          whichever week you're in.
+          17 weeks across Base, Build, Peak and Taper. Set your race date and the plan
+          positions itself against it — week 17 is race week, so week 1 starts sixteen
+          weeks before it.
         </p>
 
         <div className="plan-status">
@@ -158,6 +163,10 @@ export default function Settings({ user, onUserChange }) {
               <strong>{toRace >= 0 ? `${toRace} days away` : 'Been and gone'}</strong>
             </div>
           )}
+          <div className="plan-status-row">
+            <span>Week 1 starts</span>
+            <strong>{startLabel}</strong>
+          </div>
         </div>
 
         <label className="settings-field">
@@ -167,16 +176,6 @@ export default function Settings({ user, onUserChange }) {
             className="name-input"
             value={hyrox.raceDate}
             onChange={(e) => updateHyrox({ raceDate: e.target.value })}
-          />
-        </label>
-
-        <label className="settings-field">
-          <span>Plan week 1 starts</span>
-          <input
-            type="date"
-            className="name-input"
-            value={hyrox.planStartDate}
-            onChange={(e) => updateHyrox({ planStartDate: e.target.value })}
           />
         </label>
 

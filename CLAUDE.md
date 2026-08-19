@@ -61,7 +61,7 @@ All keys are namespaced by username:
 | `bjj_1rm_<user>` | `{ [exerciseName]: number }` — estimated 1RMs in kg |
 | `bjj_log_<user>` | `SessionLog[]` — full workout history |
 | `bjj_block_<user>` | `{ week, startDate, lastDeloadDate }` — block progression |
-| `bjj_hyrox_<user>` | `{ planStartDate, raceDate, weekOverride }` — Hyrox plan config |
+| `bjj_hyrox_<user>` | `{ raceDate, weekOverride }` — Hyrox plan config; plan week 1 is derived from `raceDate` |
 
 **SessionLog entry shape:**
 ```js
@@ -122,7 +122,7 @@ Defined in `src/data/workout.js`. Each exercise has a `loadType`:
 
 - **Phases** — Base (weeks 1–6), Build (7–12), Peak (13–15), Taper (16–17). Defined in `hyrox.js`.
 - **`getWeekTemplate(week)`** — returns the 7 days for a plan week. It's a function rather than a static lookup because details vary *within* a phase: fortnightly interval Wednesdays in Base, the every-third-week long simulation in Build, and race week in Taper.
-- **`currentPlanWeek(config)`** — derives the week from the calendar unless `weekOverride` is set in Settings.
+- **`currentPlanWeek(config)`** — derives the week from the calendar unless `weekOverride` is set in Settings. The calendar anchor is **race day**: `planStartFor()` puts week 1 sixteen weeks before race week, so the schedule and the countdown cannot disagree. Race day is the only date stored.
 - **Sessions are looked up by id**, via `getSessionById()`. The legacy BJJ sessions stay in the registry so old logs resolve.
 - **Pacing language** — the plan targets a comfortable, sustainable race. Session copy uses controlled-effort framing, never max-effort. `src/data/hyrox.test.js` enforces this.
 

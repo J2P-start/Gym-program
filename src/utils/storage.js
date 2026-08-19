@@ -68,9 +68,17 @@ export function getBlock(username) {
 }
 export function setBlock(username, data) { set(keyBlock(username), data); }
 
-/** Hyrox plan config: race date, plan start, and an optional manual week. */
+/**
+ * Hyrox plan config: race date and an optional manual week override.
+ *
+ * planStartDate used to be stored here and is now derived from the race date,
+ * so it is stripped on read — otherwise it would be written back on every save
+ * and copied on rename indefinitely.
+ */
 export function getHyrox(username) {
-  return { ...DEFAULT_HYROX, ...get(keyHyrox(username), {}) };
+  // eslint-disable-next-line no-unused-vars -- destructured out to drop the key
+  const { planStartDate, ...stored } = get(keyHyrox(username), {});
+  return { ...DEFAULT_HYROX, ...stored };
 }
 export function setHyrox(username, data) { set(keyHyrox(username), { ...getHyrox(username), ...data }); }
 

@@ -138,7 +138,7 @@ When triggered, the app shows a banner recommending a deload. Deload format: dro
 | `bjj_1rm_{username}` | Lift name → current estimated 1RM (kg) |
 | `bjj_log_{username}` | Array of session log entries |
 | `bjj_block_{username}` | Current block week number and start date |
-| `bjj_hyrox_{username}` | Race date, plan start date, and optional manual week override |
+| `bjj_hyrox_{username}` | Race date and optional manual week override (plan week 1 is derived from the race date) |
 
 ---
 

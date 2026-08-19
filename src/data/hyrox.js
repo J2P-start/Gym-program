@@ -19,8 +19,10 @@
 // deliberately flat, because both phases are explicitly about maintaining
 // rather than chasing new numbers this close to race day.
 
+// Race day is the only date stored. Plan week 1 is derived from it — see
+// planStartFor() in utils/hyroxPhase.js — so the schedule and the countdown
+// can never disagree.
 export const DEFAULT_HYROX = {
-  planStartDate: '2026-08-10', // Monday of plan week 1
   raceDate: '2026-12-06',      // Sunday — race day
   weekOverride: null,          // null = derive the week from today's date
 };
